@@ -29,6 +29,11 @@ Application de bureau (Electron + React).
 - **Galerie** — toutes tes photos réunies, avec vue plein écran.
 - **Thèmes** — clair / sombre / système, + couleur d'accent au choix.
 - **Rappel quotidien** — notification à l'heure de ton choix.
+- **Sauvegarde / restauration** — exporte une copie lisible (JSON, déchiffrée) de
+  ton journal depuis les Réglages, et réimporte-la (fusion). Indispensable pour ne
+  jamais rester coincé.
+- **Français / English** — sélecteur de langue dans les Réglages ; toute l'interface
+  bascule instantanément.
 - **Tes données t'appartiennent** — de simples fichiers dans un dossier que tu contrôles,
   aucun compte, aucune pub, aucun suivi.
 
@@ -72,10 +77,20 @@ npm run build   # (une fois, ou après une modif du code)
 ./run.sh        # lance l'app
 ```
 
+### Construire un exécutable (AppImage Linux)
+
+```bash
+npm run dist    # génère dist/Mon Journal-<version>.AppImage
+```
+
+L'icône vient de `build/icon.png`. Le fichier produit est autonome et lançable
+(`chmod +x` puis double-clic, ou `./Mon\ Journal-*.AppImage`).
+
 ### Développement
 
 ```bash
 npm run dev     # serveur Vite + Electron avec rechargement à chaud
+npm test        # tests headless du cœur logique (chiffrement, export/import…)
 ```
 
 Le mode `dev` utilise une config **isolée** (`.dev-data/` dans le projet) grâce à
