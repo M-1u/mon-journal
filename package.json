@@ -38,15 +38,19 @@
   "build": {
     "appId": "app.monjournal.desktop",
     "productName": "Mon Journal",
+    "executableName": "mon-journal",
+    "icon": "build/icon.png",
     "files": [
       "dist/**/*",
-      "electron/**/*"
+      "electron/**/*",
+      "!electron/*.test.cjs"
     ],
     "linux": {
       "target": [
         "AppImage"
       ],
-      "category": "Utility"
+      "category": "Utility",
+      "icon": "build/icon.png"
     }
   }
 }
