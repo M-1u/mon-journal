@@ -1,0 +1,52 @@
+{
+  "name": "mon-journal",
+  "version": "0.1.0",
+  "description": "Journal intime local — humeurs, photos et souvenirs. Inspiré de Daily You.",
+  "author": "Méli",
+  "license": "MIT",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev:renderer": "vite",
+    "dev:electron": "wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 MONJOURNAL_CONFIG_DIR=.dev-data electron .",
+    "dev": "concurrently -k -n vite,electron -c cyan,magenta \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "build": "vite build",
+    "test": "node electron/journal-core.test.cjs",
+    "start": "npm run build && electron .",
+    "dist": "vite build && electron-builder"
+  },
+  "dependencies": {
+    "@tiptap/extension-link": "^3.27.3",
+    "@tiptap/extension-placeholder": "^3.27.3",
+    "@tiptap/pm": "^3.27.3",
+    "@tiptap/react": "^3.27.3",
+    "@tiptap/starter-kit": "^3.27.3",
+    "marked": "^12.0.2",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^5.4.2",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "app.monjournal.desktop",
+    "productName": "Mon Journal",
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility"
+    }
+  }
+}
