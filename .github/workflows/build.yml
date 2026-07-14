@@ -36,10 +36,10 @@ jobs:
         run: npx electron-builder --publish ${{ startsWith(github.ref, 'refs/tags/') && 'always' || 'never' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Signature Windows (optionnelle) : définis ces secrets de dépôt pour
-          # signer l'exe avec ton certificat et supprimer l'alerte SmartScreen.
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        # Signature Windows (optionnelle, désactivée par défaut) : pour signer l'exe
+        # et supprimer l'alerte SmartScreen, ajoute les secrets de dépôt CSC_LINK
+        # (certificat .pfx en base64) et CSC_KEY_PASSWORD, puis rajoute-les sous `env:`
+        # ci-dessus. Sans certificat, laisse tel quel (l'exe reste non signé).
 
       - name: Artefacts (exécutions manuelles)
         if: ${{ github.event_name == 'workflow_dispatch' }}
