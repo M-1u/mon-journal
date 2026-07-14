@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { IconChevronLeft, IconPlus } from "./Icons.jsx";
 import { t } from "../lib/i18n.js";
+import BrandMark from "./BrandMark.jsx";
 
 // Access gate: create the first journal, or pick one and unlock it with its
 // password. A password is mandatory when creating a journal.
@@ -44,7 +45,7 @@ export default function LockScreen({ journals, onUnlock, onCreate }) {
     <div className="lock">
       <div className="lock-card">
         <div className="lock-brand">
-          <span className="logo">📖</span>
+          <span className="logo"><BrandMark size={24} /></span>
           <span>{t("app.name")}</span>
         </div>
 

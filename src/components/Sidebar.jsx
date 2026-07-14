@@ -8,6 +8,7 @@ import {
   IconTarget,
 } from "./Icons.jsx";
 import { t } from "../lib/i18n.js";
+import BrandMark from "./BrandMark.jsx";
 
 const NAV = [
   { id: "today", key: "nav.today", Icon: IconToday },
@@ -23,7 +24,7 @@ export default function Sidebar({ view, onNavigate, journalName }) {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <span className="logo">📖</span>
+        <span className="logo"><BrandMark size={22} /></span>
         <span>{journalName || t("app.name")}</span>
       </div>
       {NAV.map(({ id, key, Icon }) => (
