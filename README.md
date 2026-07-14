@@ -3,6 +3,16 @@
 Journal intime **local, privé et hors-ligne**, inspiré de [Daily You](https://github.com/demizo/daily_you).
 Application de bureau (Electron + React).
 
+## Captures d'écran
+
+| La journée | Le calendrier des humeurs |
+| :---: | :---: |
+| ![Vue du jour](screenshots/today.png) | ![Calendrier](screenshots/calendar.png) |
+| **Les statistiques** | **Les objectifs** |
+| ![Statistiques](screenshots/stats.png) | ![Objectifs](screenshots/goals.png) |
+
+<p align="center"><img src="screenshots/gallery.png" alt="Galerie" width="70%"></p>
+
 ## Fonctionnalités
 
 - **Plusieurs journaux** — crée autant de journaux séparés que tu veux (ex.
