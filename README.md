@@ -1,7 +1,23 @@
-# Mon Journal
+<h1 align="center">📔 Mon Journal</h1>
 
-Journal intime **local, privé et hors-ligne**, inspiré de [Daily You](https://github.com/demizo/daily_you).
-Application de bureau (Electron + React).
+<p align="center">
+  Journal intime <b>local, privé et hors-ligne</b> — humeurs, activités, objectifs et photos.<br>
+  Application de bureau chiffrée, inspirée de <a href="https://github.com/demizo/daily_you">Daily You</a>.
+</p>
+
+<p align="center">
+  <a href="https://github.com/M-1u/mon-journal/releases/latest"><img src="https://img.shields.io/github/v/release/M-1u/mon-journal?color=3da35d&label=version" alt="Dernière version"></a>
+  <a href="https://github.com/M-1u/mon-journal/releases"><img src="https://img.shields.io/github/downloads/M-1u/mon-journal/total?color=3da35d&label=t%C3%A9l%C3%A9chargements" alt="Téléchargements"></a>
+  <img src="https://img.shields.io/badge/plateformes-Windows%20%7C%20Linux-4c8bf5" alt="Plateformes">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-MIT-3da35d" alt="Licence MIT"></a>
+  <img src="https://img.shields.io/badge/Electron-React-8b5cf6" alt="Electron + React">
+</p>
+
+<p align="center">
+  <b>🇫🇷 Français</b> · <a href="README.en.md">🇬🇧 English</a>
+  &nbsp;•&nbsp;
+  <a href="https://github.com/M-1u/mon-journal/releases/latest"><b>⬇️ Télécharger</b></a>
+</p>
 
 ## Captures d'écran
 
@@ -123,3 +139,12 @@ jamais enregistré : tes vraies données restent intactes.
 - Stockage : fichiers JSON par journal + protocole `journalimg://` pour les images
 - Mots de passe : hash **scrypt** salé (jamais de mot de passe en clair)
 - Aucune base de données, aucun module natif : robuste et transparent.
+
+## Télécharger
+
+Récupère la dernière version sur la page [**Releases**](https://github.com/M-1u/mon-journal/releases/latest)
+(installateur **Windows** `.exe` et **AppImage** Linux).
+
+## Licence
+
+[MIT](LICENSE)
