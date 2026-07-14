@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { storage, isElectron } from "../lib/storage.js";
 import { IconFolder } from "./Icons.jsx";
 import ChangePasswordCard from "./ChangePasswordCard.jsx";
@@ -18,7 +19,21 @@ export default function SettingsView({
   lang,
   onLangChange,
   onImported,
+  onMoveJournal,
 }) {
+  const [moveMsg, setMoveMsg] = useState("");
+
+  async function move() {
+    const res = await onMoveJournal();
+    if (res?.ok) {
+      setMoveMsg(t("set.moved", { path: res.path }));
+      setTimeout(() => setMoveMsg(""), 5000);
+    } else if (!res?.canceled) {
+      setMoveMsg(t("set.moveError"));
+      setTimeout(() => setMoveMsg(""), 5000);
+    }
+  }
+
   return (
     <div className="view">
       <h1 className="page-title">{t("set.title")}</h1>
@@ -121,14 +136,25 @@ export default function SettingsView({
           <div className="info">
             <div className="t">{t("set.currentJournal", { name: journalName })}</div>
             <div className="d" style={{ wordBreak: "break-all" }}>
-              {isElectron ? storageRoot : t("set.previewStore")}
+              {moveMsg ? (
+                <span style={{ color: "var(--accent)", fontWeight: 600 }}>{moveMsg}</span>
+              ) : isElectron ? (
+                storageRoot
+              ) : (
+                t("set.previewStore")
+              )}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
             {isElectron && (
-              <button className="btn" onClick={() => storage.openStorageRoot()}>
-                <IconFolder width={16} height={16} /> {t("common.open")}
-              </button>
+              <>
+                <button className="btn" onClick={() => storage.openStorageRoot()}>
+                  <IconFolder width={16} height={16} /> {t("common.open")}
+                </button>
+                <button className="btn" onClick={move}>
+                  {t("set.move")}
+                </button>
+              </>
             )}
             <button className="btn" onClick={onLock}>
               {t("set.lockSwitch")}

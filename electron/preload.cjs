@@ -48,4 +48,5 @@ contextBridge.exposeInMainWorld("journalAPI", {
   // Journal folder
   getStorageRoot: () => ipcRenderer.invoke("storage:getRoot"),
   openStorageRoot: () => ipcRenderer.invoke("storage:openRoot"),
+  moveJournal: () => ipcRenderer.invoke("journal:move"),
 });

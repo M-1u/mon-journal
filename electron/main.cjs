@@ -185,6 +185,16 @@ function registerIpc() {
     }
   });
 
+  ipcMain.handle("journal:move", async () => {
+    if (!core.currentJournal()) return { ok: false };
+    const res = await dialog.showOpenDialog(mainWindow, {
+      title: "Choisir le nouvel emplacement du journal",
+      properties: ["openDirectory", "createDirectory"],
+    });
+    if (res.canceled || !res.filePaths[0]) return { ok: false, canceled: true };
+    return core.moveJournal(res.filePaths[0]);
+  });
+
   ipcMain.handle("storage:getRoot", () => core.activeJournalPath());
   ipcMain.handle("storage:openRoot", () => {
     const p = core.activeJournalPath();

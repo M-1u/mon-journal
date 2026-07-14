@@ -188,6 +188,45 @@ function changePassword(oldPassword, newPassword) {
   return { ok: true };
 }
 
+// Move a directory, with a cross-filesystem fallback (rename fails as EXDEV).
+function moveDir(src, dest) {
+  try {
+    fs.renameSync(src, dest);
+    return;
+  } catch (e) {
+    if (e.code !== "EXDEV") throw e;
+  }
+  fs.cpSync(src, dest, { recursive: true });
+  fs.rmSync(src, { recursive: true, force: true });
+}
+
+// Move the active journal's data folder into `destParentDir`, keeping its name.
+// Updates the registry and the in-memory active journal (no re-unlock needed).
+function moveJournal(destParentDir) {
+  if (!activeJournal) return { ok: false, error: "locked" };
+  const reg = loadRegistry();
+  const j = reg.journals.find((x) => x.id === activeJournal.id);
+  if (!j) return { ok: false, error: "missing" };
+
+  const base = path.basename(j.path);
+  let dest = path.join(destParentDir, base);
+  if (path.resolve(dest) === path.resolve(j.path)) {
+    return { ok: true, path: j.path }; // already there
+  }
+  if (fs.existsSync(dest)) dest = path.join(destParentDir, base + "-" + j.id.slice(0, 8));
+
+  try {
+    fs.mkdirSync(destParentDir, { recursive: true });
+    moveDir(j.path, dest);
+  } catch {
+    return { ok: false, error: "move" };
+  }
+  j.path = dest;
+  saveRegistry(reg);
+  activeJournal.path = dest;
+  return { ok: true, path: dest };
+}
+
 // --- Per-journal paths ---
 const entriesDir = () => path.join(activeJournal.path, "entries");
 const imagesDir = () => path.join(activeJournal.path, "images");
@@ -492,6 +531,7 @@ module.exports = {
   lockJournal,
   currentJournal,
   changePassword,
+  moveJournal,
   activeJournalPath,
   getDay,
   listEntries,
