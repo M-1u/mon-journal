@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mon Journal — journal intime local et chiffré</title>
+<meta name="description" content="Journal intime local, privé et hors-ligne : humeurs, activités, objectifs et photos. Application de bureau chiffrée (Windows & Linux), inspirée de Daily You.">
+<link rel="icon" href="assets/icon.png">
+<meta property="og:title" content="Mon Journal">
+<meta property="og:description" content="Journal intime local, privé et chiffré — humeurs, activités, objectifs, photos.">
+<meta property="og:image" content="assets/gallery.png">
+<style>
+  :root{
+    --bg:#0f1216; --surface:#171b21; --surface2:#1e232b; --border:#2a323d;
+    --ink:#eef2f6; --dim:#a3adba; --faint:#6c7684; --accent:#3da35d; --accent2:#7cb342;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Inter","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6}
+  a{color:var(--accent);text-decoration:none}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+  header{padding:64px 0 40px;text-align:center;
+    background:radial-gradient(1200px 500px at 50% -10%,rgba(61,163,93,.18),transparent)}
+  .logo{width:96px;height:96px;border-radius:26px;box-shadow:0 10px 40px rgba(0,0,0,.4)}
+  h1{font-size:44px;letter-spacing:-.02em;margin:18px 0 6px;font-weight:800}
+  .tagline{color:var(--dim);font-size:19px;max-width:620px;margin:0 auto 8px}
+  .sub{color:var(--faint);font-size:14px;margin-bottom:26px}
+  .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:999px;
+    font-weight:700;font-size:15px;border:1px solid var(--border);background:var(--surface);color:var(--ink);
+    transition:transform .08s, background .15s, border-color .15s}
+  .btn:hover{transform:translateY(-2px);background:var(--surface2)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{background:#2f8a4d}
+  .platforms{color:var(--faint);font-size:13px;margin-top:14px}
+  .hero-gif{margin:44px auto 0;display:block;max-width:88%;border-radius:16px;
+    border:1px solid var(--border);box-shadow:0 18px 60px rgba(0,0,0,.45)}
+  section{padding:56px 0}
+  h2{font-size:28px;letter-spacing:-.01em;text-align:center;margin:0 0 8px;font-weight:750}
+  .lead{color:var(--dim);text-align:center;margin:0 auto 34px;max-width:640px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px}
+  .card .ic{font-size:24px}
+  .card h3{margin:10px 0 6px;font-size:16.5px}
+  .card p{margin:0;color:var(--dim);font-size:14px}
+  .shots{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .shots img{width:100%;border-radius:12px;border:1px solid var(--border);display:block}
+  .note{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+    border-radius:12px;padding:16px 18px;color:var(--dim);font-size:14.5px;max-width:760px;margin:0 auto}
+  footer{padding:40px 0 60px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--border)}
+  @media(max-width:640px){h1{font-size:34px}.shots{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <img class="logo" src="assets/icon.png" alt="Logo Mon Journal">
+    <h1>Mon Journal</h1>
+    <p class="tagline">Ton journal intime <b>local, privé et chiffré</b> — humeurs, activités, objectifs et photos.</p>
+    <p class="sub">Gratuit · open-source · aucun compte · aucune donnée envoyée. Inspiré de <a href="https://github.com/demizo/daily_you">Daily You</a>.</p>
+    <div class="btns">
+      <a class="btn primary" href="https://github.com/M-1u/mon-journal/releases/latest">⬇️ Télécharger</a>
+      <a class="btn" href="https://github.com/M-1u/mon-journal">★ Voir sur GitHub</a>
+    </div>
+    <p class="platforms">Windows (.exe) &nbsp;·&nbsp; Linux (AppImage) &nbsp;·&nbsp; interface FR / EN</p>
+    <img class="hero-gif" src="assets/demo.gif" alt="Aperçu animé de Mon Journal">
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Ce que tu peux faire</h2>
+    <p class="lead">Un vrai journal de bord au quotidien, façon Daylio — mais chez toi et chiffré.</p>
+    <div class="grid">
+      <div class="card"><div class="ic">😊</div><h3>Humeurs & activités</h3><p>Plusieurs entrées par jour, chacune avec une humeur (5 niveaux) et des tags d'activité.</p></div>
+      <div class="card"><div class="ic">🎯</div><h3>Objectifs</h3><p>Des objectifs court / moyen / long terme, que tu valides depuis tes entrées.</p></div>
+      <div class="card"><div class="ic">📸</div><h3>Photos par jour</h3><p>Ajoute des photos avec légende ; retrouve-les dans une galerie dédiée.</p></div>
+      <div class="card"><div class="ic">🔒</div><h3>Chiffré</h3><p>Mot de passe obligatoire et chiffrement AES-256-GCM au repos. Tes fichiers restent illisibles sans ton mot de passe.</p></div>
+      <div class="card"><div class="ic">📊</div><h3>Statistiques</h3><p>Séries, humeur moyenne, répartition et tendances sur 30 jours.</p></div>
+      <div class="card"><div class="ic">📓</div><h3>Multi-journaux</h3><p>Autant de journaux séparés que tu veux, chacun avec son mot de passe.</p></div>
+      <div class="card"><div class="ic">✍️</div><h3>Éditeur visuel</h3><p>Mise en forme façon traitement de texte, stockée en Markdown lisible.</p></div>
+      <div class="card"><div class="ic">💾</div><h3>Sauvegarde</h3><p>Export/import de tes données. Elles restent de simples fichiers chez toi.</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--surface)">
+  <div class="wrap">
+    <h2>En images</h2>
+    <p class="lead">Sombre ou clair, avec la couleur d'accent de ton choix.</p>
+    <div class="shots">
+      <img src="assets/today.png" alt="Vue du jour">
+      <img src="assets/calendar.png" alt="Calendrier des humeurs">
+      <img src="assets/stats.png" alt="Statistiques">
+      <img src="assets/goals.png" alt="Objectifs">
+    </div>
+    <img src="assets/gallery.png" alt="Galerie" style="width:100%;margin-top:16px;border-radius:12px;border:1px solid var(--border)">
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="note">
+      ⚠️ <b>Chiffrement réel :</b> ton mot de passe protège et chiffre tes données.
+      S'il est oublié, elles sont <b>irrécupérables</b> — pense à faire des sauvegardes.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><a href="https://github.com/M-1u/mon-journal">github.com/M-1u/mon-journal</a> · Licence MIT · fait avec Electron + React</p>
+  </div>
+</footer>
+
+</body>
+</html>

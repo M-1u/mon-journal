@@ -40,6 +40,13 @@
     "productName": "Mon Journal",
     "executableName": "mon-journal",
     "icon": "build/icon.png",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "M-1u",
+        "repo": "mon-journal"
+      }
+    ],
     "files": [
       "dist/**/*",
       "electron/**/*",
