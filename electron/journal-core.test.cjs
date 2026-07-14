@@ -108,6 +108,21 @@ ok("imported goals merged", core.getGoals().length === exported.goals.length);
 const impImg = core.readImageBuffer(core.listEntries().find((e) => e.images.length)?.images[0].name);
 ok("imported image decrypts (round-trips)", !!impImg && impImg.length > 0);
 
+// 11. Move the journal folder to a new location
+const j2reg = JSON.parse(fs.readFileSync(path.join(tmp, "journals.json"), "utf8")).journals.find((x) => x.name === "Backup");
+const oldPath = j2reg.path;
+const newParent = path.join(tmp, "moved-here");
+const mv = core.moveJournal(newParent);
+ok("moveJournal ok", mv.ok === true);
+ok("old folder is gone", !fs.existsSync(oldPath));
+ok("new folder exists with entries", fs.existsSync(path.join(mv.path, "entries")));
+ok("registry path updated", JSON.parse(fs.readFileSync(path.join(tmp, "journals.json"), "utf8")).journals.find((x) => x.name === "Backup").path === mv.path);
+ok("data still readable after move (no re-unlock)", core.listEntries().length >= 1);
+// Re-unlock from scratch to confirm it works from the new path too
+core.lockJournal();
+ok("re-unlock from new location works", !!core.unlockJournal(j2reg.id, "pw12345"));
+ok("entries intact from new location", core.listEntries().length >= 1);
+
 console.log(`\n${pass} checks passed.`);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log("(temp dir cleaned)");

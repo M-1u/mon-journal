@@ -157,6 +157,9 @@ const FR = {
   "set.currentJournal": "Journal actuel · {name}",
   "set.previewStore": "Stockage du navigateur (aperçu)",
   "set.lockSwitch": "🔒 Verrouiller / changer",
+  "set.move": "Déplacer…",
+  "set.moved": "✓ Journal déplacé vers {path}",
+  "set.moveError": "Le déplacement a échoué.",
   "set.footer": "Mon Journal · tes données restent chez toi, hors-ligne. Inspiré de Daily You.",
 
   // Change password
@@ -354,6 +357,9 @@ const EN = {
   "set.currentJournal": "Current journal · {name}",
   "set.previewStore": "Browser storage (preview)",
   "set.lockSwitch": "🔒 Lock / switch",
+  "set.move": "Move…",
+  "set.moved": "✓ Journal moved to {path}",
+  "set.moveError": "Move failed.",
   "set.footer": "My Journal · your data stays with you, offline. Inspired by Daily You.",
 
   "pw.title": "Password",

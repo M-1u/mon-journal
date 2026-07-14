@@ -296,6 +296,10 @@ export const storage = {
   async openStorageRoot() {
     if (isElectron) return api.openStorageRoot();
   },
+  async moveJournal() {
+    if (isElectron) return api.moveJournal();
+    return { ok: false, unsupported: true };
+  },
 };
 
 // ---- fallback export/import (browser preview) ------------------------------

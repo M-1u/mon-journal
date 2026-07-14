@@ -173,6 +173,12 @@ export default function App() {
     setLangState(l); // re-render the whole tree so every t() updates
   }, []);
 
+  const handleMoveJournal = useCallback(async () => {
+    const res = await storage.moveJournal();
+    if (res?.ok) setStorageRoot(res.path);
+    return res;
+  }, []);
+
   const handleImported = useCallback(async () => {
     const [list, acts, gls] = await Promise.all([
       storage.listEntries(),
@@ -230,6 +236,7 @@ export default function App() {
             lang={lang}
             onLangChange={changeLang}
             onImported={handleImported}
+            onMoveJournal={handleMoveJournal}
           />
         )}
       </main>
