@@ -21,6 +21,8 @@
 
 > The app's interface is available in both **French and English** (switch in Settings).
 
+<p align="center"><img src="screenshots/demo.gif" alt="Animated preview of Mon Journal" width="86%"></p>
+
 ## Screenshots
 
 | The day | The mood calendar |

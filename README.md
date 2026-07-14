@@ -19,6 +19,8 @@
   <a href="https://github.com/M-1u/mon-journal/releases/latest"><b>⬇️ Télécharger</b></a>
 </p>
 
+<p align="center"><img src="screenshots/demo.gif" alt="Aperçu animé de Mon Journal" width="86%"></p>
+
 ## Captures d'écran
 
 | La journée | Le calendrier des humeurs |
