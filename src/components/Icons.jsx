@@ -113,6 +113,12 @@ export const IconFlame = (p) => (
     <path d="M12 2s4 4 4 8a4 4 0 0 1-8 0c0-1 .5-2 .5-2S8 11 8 13a4 4 0 0 0 8 0c0-5-4-11-4-11z" />
   </svg>
 );
+export const IconSearch = (p) => (
+  <svg {...base} {...p}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="M21 21l-4.3-4.3" />
+  </svg>
+);
 export const IconTarget = (p) => (
   <svg {...base} {...p}>
     <circle cx="12" cy="12" r="9" />

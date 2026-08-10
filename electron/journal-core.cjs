@@ -483,6 +483,9 @@ const DEFAULT_SETTINGS = {
   accent: "#3da35d",
   reminderEnabled: false,
   reminderTime: "20:00",
+  autoLockMinutes: 0, // 0 = disabled
+  privacyBlur: false, // blur content when the window loses focus
+  spellcheck: true, // native spell checking in the editor
 };
 function readSettings() {
   if (!activeJournal) return { ...DEFAULT_SETTINGS };

@@ -22,6 +22,28 @@ export default function SettingsView({
   onMoveJournal,
 }) {
   const [moveMsg, setMoveMsg] = useState("");
+  const [pdfMsg, setPdfMsg] = useState("");
+  const [updMsg, setUpdMsg] = useState("");
+
+  async function exportPdf() {
+    setPdfMsg(t("set.pdfWorking"));
+    const res = await window.journalAPI?.exportPdf();
+    if (res?.ok) setPdfMsg(t("set.pdfDone"));
+    else if (res?.canceled) setPdfMsg("");
+    else setPdfMsg(t("set.pdfError"));
+    setTimeout(() => setPdfMsg(""), 5000);
+  }
+
+  async function checkUpdates() {
+    setUpdMsg(t("set.updChecking"));
+    const res = await window.journalAPI?.checkUpdates();
+    if (res?.dev) setUpdMsg(t("set.updDev"));
+    else if (res?.ok) setUpdMsg(res.version ? t("set.updFound", { v: res.version }) : t("set.updNone"));
+    else setUpdMsg(t("set.updError"));
+    setTimeout(() => setUpdMsg(""), 6000);
+  }
+
+  const LOCK_OPTS = [0, 1, 5, 15, 30];
 
   async function move() {
     const res = await onMoveJournal();
@@ -124,6 +146,74 @@ export default function SettingsView({
           </div>
         ) : null}
       </div>
+
+      <div className="card" style={{ marginTop: 18 }}>
+        <div className="set-row">
+          <div className="info">
+            <div className="t">{t("set.autoLock")}</div>
+            <div className="d">{t("set.autoLockSub")}</div>
+          </div>
+          <select
+            value={settings.autoLockMinutes ?? 0}
+            onChange={(e) => onChange({ autoLockMinutes: Number(e.target.value) })}
+          >
+            {LOCK_OPTS.map((m) => (
+              <option key={m} value={m}>
+                {m === 0 ? t("set.autoLockOff") : t("set.minutes", { n: m })}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {isElectron && (
+          <div className="set-row">
+            <div className="info">
+              <div className="t">{t("set.privacyBlur")}</div>
+              <div className="d">{t("set.privacyBlurSub")}</div>
+            </div>
+            <button
+              className={"switch" + (settings.privacyBlur ? " on" : "")}
+              onClick={() => onChange({ privacyBlur: !settings.privacyBlur })}
+            />
+          </div>
+        )}
+
+        {isElectron && (
+          <div className="set-row">
+            <div className="info">
+              <div className="t">{t("set.spellcheck")}</div>
+              <div className="d">{t("set.spellcheckSub")}</div>
+            </div>
+            <button
+              className={"switch" + (settings.spellcheck ? " on" : "")}
+              onClick={() => onChange({ spellcheck: !settings.spellcheck })}
+            />
+          </div>
+        )}
+      </div>
+
+      {isElectron && (
+        <div className="card" style={{ marginTop: 18 }}>
+          <div className="set-row">
+            <div className="info">
+              <div className="t">{t("set.pdf")}</div>
+              <div className="d">
+                {pdfMsg ? <span style={{ color: "var(--accent)", fontWeight: 600 }}>{pdfMsg}</span> : t("set.pdfSub")}
+              </div>
+            </div>
+            <button className="btn" onClick={exportPdf}>{t("set.pdfBtn")}</button>
+          </div>
+          <div className="set-row">
+            <div className="info">
+              <div className="t">{t("set.updates")}</div>
+              <div className="d">
+                {updMsg ? <span style={{ color: "var(--accent)", fontWeight: 600 }}>{updMsg}</span> : t("set.updatesSub")}
+              </div>
+            </div>
+            <button className="btn" onClick={checkUpdates}>{t("set.updBtn")}</button>
+          </div>
+        </div>
+      )}
 
       <ActivitiesManager activities={activities} onChange={onActivitiesChange} />
 

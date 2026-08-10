@@ -30,6 +30,9 @@ const DEFAULT_IDS = new Set(DEFAULT_ACTIVITIES.map((a) => a.id));
 // user-defined name.
 export function activityLabel(a) {
   if (!a) return "";
+  // A user-edited (custom) activity keeps its stored name; built-in defaults are
+  // translated by id.
+  if (a.custom) return a.name;
   return DEFAULT_IDS.has(a.id) ? t("activity." + a.id) : a.name;
 }
 

@@ -6,12 +6,14 @@ import {
   IconGallery,
   IconSettings,
   IconTarget,
+  IconSearch,
 } from "./Icons.jsx";
 import { t } from "../lib/i18n.js";
 import BrandMark from "./BrandMark.jsx";
 
 const NAV = [
   { id: "today", key: "nav.today", Icon: IconToday },
+  { id: "search", key: "nav.search", Icon: IconSearch },
   { id: "calendar", key: "nav.calendar", Icon: IconCalendar },
   { id: "timeline", key: "nav.timeline", Icon: IconTimeline },
   { id: "goals", key: "nav.goals", Icon: IconTarget },

@@ -49,4 +49,22 @@ contextBridge.exposeInMainWorld("journalAPI", {
   getStorageRoot: () => ipcRenderer.invoke("storage:getRoot"),
   openStorageRoot: () => ipcRenderer.invoke("storage:openRoot"),
   moveJournal: () => ipcRenderer.invoke("journal:move"),
+
+  // PDF + updates
+  exportPdf: () => ipcRenderer.invoke("journal:exportPdf"),
+  checkUpdates: () => ipcRenderer.invoke("app:checkUpdates"),
+  installUpdate: () => ipcRenderer.invoke("app:installUpdate"),
+
+  // Main → renderer events (returns an unsubscribe function)
+  onWindowBlur: (cb) => sub("window:blur", cb),
+  onWindowFocus: (cb) => sub("window:focus", cb),
+  onLock: (cb) => sub("app:lock", cb),
+  onNewEntry: (cb) => sub("app:new-entry", cb),
+  onUpdateReady: (cb) => sub("app:update-ready", cb),
 });
+
+function sub(channel, cb) {
+  const handler = () => cb();
+  ipcRenderer.on(channel, handler);
+  return () => ipcRenderer.removeListener(channel, handler);
+}

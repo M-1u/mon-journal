@@ -7,16 +7,20 @@ import StatsView from "./components/StatsView.jsx";
 import GalleryView from "./components/GalleryView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import GoalsView from "./components/GoalsView.jsx";
+import SearchView from "./components/SearchView.jsx";
 import LockScreen from "./components/LockScreen.jsx";
 import { storage } from "./lib/storage.js";
 import { todayKey } from "./lib/date.js";
-import { getLang, setLang } from "./lib/i18n.js";
+import { getLang, setLang, t } from "./lib/i18n.js";
 
 const DEFAULT_SETTINGS = {
   theme: "system",
   accent: "#3da35d",
   reminderEnabled: false,
   reminderTime: "20:00",
+  autoLockMinutes: 0,
+  privacyBlur: false,
+  spellcheck: true,
 };
 
 function inkFor(hex) {
@@ -41,6 +45,8 @@ export default function App() {
   const [goals, setGoals] = useState([]);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [storageRoot, setStorageRoot] = useState("");
+  const [newEntrySignal, setNewEntrySignal] = useState(0);
+  const [updateReady, setUpdateReady] = useState(false);
 
   const enterJournal = useCallback(async (journal) => {
     const [s, list, acts, gls, root] = await Promise.all([
@@ -190,6 +196,71 @@ export default function App() {
     setGoals(gls);
   }, []);
 
+  // Auto-lock after a period of inactivity (per-journal setting, minutes).
+  useEffect(() => {
+    const mins = Number(settings.autoLockMinutes) || 0;
+    if (phase !== "unlocked" || mins <= 0) return;
+    let timer;
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => handleLock(), mins * 60 * 1000);
+    };
+    const evts = ["mousemove", "mousedown", "keydown", "wheel", "touchstart"];
+    evts.forEach((e) => window.addEventListener(e, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(timer);
+      evts.forEach((e) => window.removeEventListener(e, reset));
+    };
+  }, [phase, settings.autoLockMinutes, handleLock]);
+
+  // Privacy: blur the whole app when the window loses focus.
+  useEffect(() => {
+    const api = window.journalAPI;
+    if (!api?.onWindowBlur) return;
+    const onBlur = () => {
+      if (settings.privacyBlur && phase === "unlocked") {
+        document.body.classList.add("privacy-blur");
+      }
+    };
+    const onFocus = () => document.body.classList.remove("privacy-blur");
+    const off1 = api.onWindowBlur(onBlur);
+    const off2 = api.onWindowFocus(onFocus);
+    return () => {
+      off1?.();
+      off2?.();
+      document.body.classList.remove("privacy-blur");
+    };
+  }, [settings.privacyBlur, phase]);
+
+  // Lock when the OS suspends / locks the screen.
+  useEffect(() => {
+    const api = window.journalAPI;
+    if (!api?.onLock) return;
+    return api.onLock(() => {
+      if (phase === "unlocked") handleLock();
+    });
+  }, [phase, handleLock]);
+
+  // "New entry" from the tray / quick add.
+  useEffect(() => {
+    const api = window.journalAPI;
+    if (!api?.onNewEntry) return;
+    return api.onNewEntry(() => {
+      if (phase !== "unlocked") return;
+      setDate(todayKey());
+      setView("today");
+      setNewEntrySignal((n) => n + 1);
+    });
+  }, [phase]);
+
+  // Update downloaded → offer a restart.
+  useEffect(() => {
+    const api = window.journalAPI;
+    if (!api?.onUpdateReady) return;
+    return api.onUpdateReady(() => setUpdateReady(true));
+  }, []);
+
   if (phase === "loading") return null;
 
   if (phase === "locked") {
@@ -198,14 +269,25 @@ export default function App() {
 
   return (
     <div className="app">
+      {updateReady && (
+        <div className="update-banner">
+          {t("update.ready")}
+          <button className="btn primary" onClick={() => window.journalAPI?.installUpdate()}>
+            {t("update.restart")}
+          </button>
+          <button className="update-close" onClick={() => setUpdateReady(false)} title={t("common.cancel")}>×</button>
+        </div>
+      )}
       <Sidebar view={view} onNavigate={setView} journalName={journalName} />
       <main className="main">
         {view === "today" && (
           <DayView
             date={date}
             dayEntries={dayEntries}
+            allEntries={entries}
             activities={activities}
             goals={goals}
+            newEntrySignal={newEntrySignal}
             onDateChange={setDate}
             onSaveEntry={handleSaveEntry}
             onDeleteEntry={handleDeleteEntry}
@@ -219,6 +301,9 @@ export default function App() {
         )}
         {view === "goals" && (
           <GoalsView goals={goals} entries={entries} onChange={handleGoalsChange} />
+        )}
+        {view === "search" && (
+          <SearchView entries={entries} activities={activities} onOpenDay={openDay} />
         )}
         {view === "stats" && (
           <StatsView entries={entries} entriesByDate={entriesByDate} activities={activities} />

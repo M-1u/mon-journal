@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MOODS, moodLabel } from "../lib/moods.js";
 import { normImages } from "../lib/images.js";
 import { goalMap, TERM_BY_ID } from "../lib/goals.js";
+import { storage } from "../lib/storage.js";
 import { t } from "../lib/i18n.js";
 import MarkdownEditor from "./MarkdownEditor.jsx";
 import PhotoStrip from "./PhotoStrip.jsx";
@@ -13,6 +14,13 @@ function nowTime() {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
+const TEMPLATES = [
+  ["tpl.gratitude", "tpl.gratitudeBody"],
+  ["tpl.review", "tpl.reviewBody"],
+  ["tpl.morning", "tpl.morningBody"],
+  ["tpl.feelings", "tpl.feelingsBody"],
+];
+
 // Full form to create or edit one entry.
 export default function EntryEditor({ date, entry, activities, goals, onSave, onDelete, onCancel }) {
   const isNew = !entry;
@@ -22,6 +30,29 @@ export default function EntryEditor({ date, entry, activities, goals, onSave, on
   const [goalIds, setGoalIds] = useState(entry?.goals || []);
   const [text, setText] = useState(entry?.text || "");
   const [images, setImages] = useState(normImages(entry?.images));
+  const [dragOver, setDragOver] = useState(false);
+
+  async function addImageFiles(fileList) {
+    const files = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
+    if (!files.length) return;
+    const names = await storage.addImageFiles(files);
+    setImages((cur) => [...cur, ...names.map((name) => ({ name, caption: "" }))]);
+  }
+
+  function onPaste(e) {
+    const files = Array.from(e.clipboardData?.files || []).filter((f) => f.type.startsWith("image/"));
+    if (files.length) {
+      e.preventDefault();
+      addImageFiles(files);
+    }
+  }
+  function onDrop(e) {
+    if (e.dataTransfer?.files?.length) {
+      e.preventDefault();
+      setDragOver(false);
+      addImageFiles(e.dataTransfer.files);
+    }
+  }
 
   const gMap = goalMap(goals);
   const available = (goals || []).filter((g) => !goalIds.includes(g.id));
@@ -36,6 +67,12 @@ export default function EntryEditor({ date, entry, activities, goals, onSave, on
     setGoalIds((cur) => cur.filter((x) => x !== id));
   }
 
+  function applyTemplate(bodyKey) {
+    if (!bodyKey) return;
+    const body = t(bodyKey);
+    setText((cur) => (cur.trim() ? cur.replace(/\s+$/, "") + "\n\n" + body : body));
+  }
+
   function save() {
     onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images });
   }
@@ -43,7 +80,13 @@ export default function EntryEditor({ date, entry, activities, goals, onSave, on
   const canSave = mood != null || text.trim() || acts.length || images.length || goalIds.length;
 
   return (
-    <div className="entry-editor">
+    <div
+      className={"entry-editor" + (dragOver ? " drag-over" : "")}
+      onPaste={onPaste}
+      onDrop={onDrop}
+      onDragOver={(e) => { if (e.dataTransfer?.types?.includes("Files")) { e.preventDefault(); setDragOver(true); } }}
+      onDragLeave={(e) => { if (e.currentTarget === e.target) setDragOver(false); }}
+    >
       <div className="ee-head">
         <button className="btn ghost" onClick={onCancel}>
           <IconChevronLeft width={16} height={16} /> {t("common.back")}
@@ -119,7 +162,19 @@ export default function EntryEditor({ date, entry, activities, goals, onSave, on
         </div>
       )}
 
-      <p className="section-label" style={{ marginTop: 24 }}>{t("editor.note")}</p>
+      <div className="note-head">
+        <p className="section-label" style={{ margin: 0 }}>{t("editor.note")}</p>
+        <select
+          className="tpl-select"
+          value=""
+          onChange={(e) => { applyTemplate(e.target.value); e.target.value = ""; }}
+        >
+          <option value="" disabled>{t("tpl.label")}</option>
+          {TEMPLATES.map(([labelKey, bodyKey]) => (
+            <option key={bodyKey} value={bodyKey}>{t(labelKey)}</option>
+          ))}
+        </select>
+      </div>
       <MarkdownEditor value={text} onChange={setText} />
 
       <p className="section-label" style={{ marginTop: 24 }}>{t("editor.photos")}</p>

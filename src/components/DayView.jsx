@@ -8,6 +8,7 @@ import { IconChevronLeft, IconChevronRight, IconPlus } from "./Icons.jsx";
 import { t } from "../lib/i18n.js";
 import EntryEditor from "./EntryEditor.jsx";
 import EntryReadView from "./EntryReadView.jsx";
+import Memories from "./Memories.jsx";
 
 function excerpt(text) {
   return (text || "").replace(/[#*_`>\-[\]]/g, "").replace(/\n+/g, " ").trim();
@@ -53,7 +54,7 @@ function EntryCard({ entry, actMap, onClick }) {
   );
 }
 
-export default function DayView({ date, dayEntries, activities, goals, onDateChange, onSaveEntry, onDeleteEntry }) {
+export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, onDateChange, onSaveEntry, onDeleteEntry }) {
   const [editing, setEditing] = useState(null); // null | 'new' | entry
   const [viewing, setViewing] = useState(null); // null | entry (read mode)
   const actMap = activityMap(activities);
@@ -63,6 +64,14 @@ export default function DayView({ date, dayEntries, activities, goals, onDateCha
     setEditing(null);
     setViewing(null);
   }, [date]);
+
+  // Quick-add from the tray: jump straight into a new entry.
+  useEffect(() => {
+    if (newEntrySignal) {
+      setViewing(null);
+      setEditing("new");
+    }
+  }, [newEntrySignal]);
 
   async function handleSave(entry) {
     await onSaveEntry(entry);
@@ -143,6 +152,8 @@ export default function DayView({ date, dayEntries, activities, goals, onDateCha
           <button className="add-entry" onClick={() => setEditing("new")}>
             <IconPlus /> {t("day.newEntry")}
           </button>
+
+          <Memories date={date} allEntries={allEntries || []} onOpenDay={onDateChange} />
 
           {entries.length === 0 ? (
             <div className="empty">
