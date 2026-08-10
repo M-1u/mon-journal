@@ -55,6 +55,9 @@ const FR = {
   "day.goalsReached": "{n} objectif atteint",
   "day.goalsReached_plural": "{n} objectifs atteints",
 
+  // Read view
+  "read.edit": "Modifier",
+
   // Entry editor
   "editor.new": "Nouvelle entrée",
   "editor.edit": "Modifier l'entrée",
@@ -132,6 +135,7 @@ const FR = {
   "goals.progress": "{done}/{total} atteint",
   "goals.progress_plural": "{done}/{total} atteints",
   "goals.placeholder": "Nouvel objectif (ex. Courir 10 km)",
+  "goals.presets": "💡 Suggestions…",
   "goals.emptyTerm": "Aucun objectif à {term}.",
   "goals.reachedOn": "Atteint le {date}",
   "term.short": "Court terme",
@@ -265,6 +269,8 @@ const EN = {
   "day.goalsReached": "{n} goal reached",
   "day.goalsReached_plural": "{n} goals reached",
 
+  "read.edit": "Edit",
+
   "editor.new": "New entry",
   "editor.edit": "Edit entry",
   "editor.time": "Entry time",
@@ -333,6 +339,7 @@ const EN = {
   "goals.progress": "{done}/{total} reached",
   "goals.progress_plural": "{done}/{total} reached",
   "goals.placeholder": "New goal (e.g. Run 10 km)",
+  "goals.presets": "💡 Suggestions…",
   "goals.emptyTerm": "No {term} goals.",
   "goals.reachedOn": "Reached on {date}",
   "term.short": "Short term",

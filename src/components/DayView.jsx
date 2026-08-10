@@ -7,6 +7,7 @@ import { formatLong, isToday, isFuture, addDays, todayKey } from "../lib/date.js
 import { IconChevronLeft, IconChevronRight, IconPlus } from "./Icons.jsx";
 import { t } from "../lib/i18n.js";
 import EntryEditor from "./EntryEditor.jsx";
+import EntryReadView from "./EntryReadView.jsx";
 
 function excerpt(text) {
   return (text || "").replace(/[#*_`>\-[\]]/g, "").replace(/\n+/g, " ").trim();
@@ -54,18 +55,24 @@ function EntryCard({ entry, actMap, onClick }) {
 
 export default function DayView({ date, dayEntries, activities, goals, onDateChange, onSaveEntry, onDeleteEntry }) {
   const [editing, setEditing] = useState(null); // null | 'new' | entry
+  const [viewing, setViewing] = useState(null); // null | entry (read mode)
   const actMap = activityMap(activities);
 
-  // Leave the editor when navigating to another day.
-  useEffect(() => setEditing(null), [date]);
+  // Leave the editor/reader when navigating to another day.
+  useEffect(() => {
+    setEditing(null);
+    setViewing(null);
+  }, [date]);
 
   async function handleSave(entry) {
     await onSaveEntry(entry);
     setEditing(null);
+    setViewing(null);
   }
   async function handleDelete(entry) {
     await onDeleteEntry(date, entry.id);
     setEditing(null);
+    setViewing(null);
   }
 
   if (editing) {
@@ -78,7 +85,22 @@ export default function DayView({ date, dayEntries, activities, goals, onDateCha
           goals={goals}
           onSave={handleSave}
           onDelete={handleDelete}
-          onCancel={() => setEditing(null)}
+          onCancel={() => { setEditing(null); }}
+        />
+      </div>
+    );
+  }
+
+  if (viewing) {
+    return (
+      <div className="view">
+        <EntryReadView
+          entry={viewing}
+          activities={activities}
+          goals={goals}
+          onEdit={(entry) => { setViewing(null); setEditing(entry); }}
+          onDelete={handleDelete}
+          onBack={() => setViewing(null)}
         />
       </div>
     );
@@ -131,7 +153,7 @@ export default function DayView({ date, dayEntries, activities, goals, onDateCha
           ) : (
             <div className="day-entries">
               {entries.map((e) => (
-                <EntryCard key={e.id} entry={e} actMap={actMap} onClick={() => setEditing(e)} />
+                <EntryCard key={e.id} entry={e} actMap={actMap} onClick={() => setViewing(e)} />
               ))}
             </div>
           )}

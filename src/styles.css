@@ -232,6 +232,7 @@ button {
   padding: 12px 14px;
   border: 1px solid var(--border);
   background: var(--surface-2);
+  color: var(--ink);
   border-radius: var(--radius-sm);
   text-align: left;
   transition: border-color 0.15s, transform 0.08s, background 0.15s;
@@ -1640,6 +1641,7 @@ input[type="time"] {
 .goal-add-text:focus { border-color: var(--accent); }
 
 .goal-term-select,
+.goal-preset-select,
 .goal-select {
   font-family: inherit;
   font-size: 14px;
@@ -1652,7 +1654,9 @@ input[type="time"] {
   cursor: pointer;
 }
 .goal-term-select:focus,
+.goal-preset-select:focus,
 .goal-select:focus { border-color: var(--accent); }
+.goal-preset-select { max-width: 210px; }
 
 .goal-select {
   width: 100%;
@@ -1762,4 +1766,59 @@ input[type="time"] {
   font-size: 12.5px;
   font-weight: 600;
   color: var(--accent);
+}
+
+/* ===========================================================================
+   Entry read view (lecture seule)
+   =========================================================================== */
+.entry-read { animation: fade 0.2s ease; }
+.er-time {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  margin-left: 4px;
+}
+.er-mood {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 750;
+  margin-top: 20px;
+}
+.er-mood-emoji { font-size: 30px; line-height: 1; }
+.er-note {
+  margin-top: 20px;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.er-note :first-child { margin-top: 0; }
+.er-note :last-child { margin-bottom: 0; }
+.er-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+.er-photo {
+  margin: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  background: var(--surface-2);
+  transition: transform 0.1s, border-color 0.15s;
+}
+.er-photo:hover { transform: translateY(-2px); border-color: var(--accent); }
+.er-photo img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+.er-photo figcaption {
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: var(--ink-dim);
 }

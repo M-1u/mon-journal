@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { TERMS, newGoalId, achievedGoalIds, achievedDates } from "../lib/goals.js";
+import { TERMS, TERM_BY_ID, GOAL_PRESETS, newGoalId, achievedGoalIds, achievedDates } from "../lib/goals.js";
 import { formatMedium } from "../lib/date.js";
-import { t } from "../lib/i18n.js";
+import { t, getLang } from "../lib/i18n.js";
 import { IconPlus, IconClose, IconCheck } from "./Icons.jsx";
 
 // Global goals list, grouped by term. Goals are marked "atteint" when validated
@@ -13,12 +13,21 @@ export default function GoalsView({ goals, entries, onChange }) {
   const achieved = achievedGoalIds(entries);
   const dates = achievedDates(entries);
 
+  const lang = getLang();
+
   function add(e) {
     e.preventDefault();
-    const t = text.trim();
-    if (!t) return;
-    onChange([...goals, { id: newGoalId(), text: t, term, createdAt: new Date().toISOString() }]);
+    const txt = text.trim();
+    if (!txt) return;
+    onChange([...goals, { id: newGoalId(), text: txt, term, createdAt: new Date().toISOString() }]);
     setText("");
+  }
+
+  function pickPreset(i) {
+    const p = GOAL_PRESETS[i];
+    if (!p) return;
+    setText(p[lang] || p.fr);
+    setTerm(p.term);
   }
 
   function remove(id) {
@@ -36,6 +45,16 @@ export default function GoalsView({ goals, entries, onChange }) {
       </p>
 
       <form onSubmit={add} className="goal-add card">
+        <select
+          className="goal-preset-select"
+          value=""
+          onChange={(e) => { pickPreset(Number(e.target.value)); e.target.value = ""; }}
+        >
+          <option value="" disabled>{t("goals.presets")}</option>
+          {GOAL_PRESETS.map((p, i) => (
+            <option key={i} value={i}>{TERM_BY_ID[p.term].emoji} {p[lang] || p.fr}</option>
+          ))}
+        </select>
         <input
           className="goal-add-text"
           placeholder={t("goals.placeholder")}
