@@ -137,6 +137,34 @@ ok("place/weather/favorite intact after lock", got.place === "Lac d'Annecy" && g
 const exp2 = core.exportData();
 ok("export carries new fields", JSON.stringify(exp2).includes("Lac d'Annecy") && exp2.entries.some((e) => e.weather === "sunny" && e.favorite === true));
 
+// 13. Travel log: countries + cities persist, normalize, and round-trip
+core.setTravel({ countries: { fr: "visited", JP: "wishlist", XX: "bad" }, cities: [{ name: "Tokyo", country: "jp", status: "wishlist" }, { name: "" }] });
+const trv = core.getTravel();
+ok("country codes upper-cased", trv.countries.FR === "visited" && trv.countries.JP === "wishlist");
+ok("invalid country status dropped", !("XX" in trv.countries));
+ok("city kept + country upper-cased", trv.cities.length === 1 && trv.cities[0].name === "Tokyo" && trv.cities[0].country === "JP");
+core.lockJournal();
+ok("re-unlock after travel", !!core.unlockJournal(j2reg.id, "pw12345"));
+ok("travel intact after lock (encrypted)", core.getTravel().countries.FR === "visited");
+const trvFile = fs.readFileSync(path.join(core.activeJournalPath(), "travel.json"), "utf8");
+ok("travel file is encrypted", JSON.parse(trvFile).enc === 1);
+const exp3 = core.exportData();
+ok("export carries travel", exp3.travel && exp3.travel.countries.FR === "visited");
+
+// 14. Tags & people: normalized (strip #/@, lowercase tags, dedupe), persist
+const te = core.upsertEntry({
+  date: "2026-09-01", time: "08:00", text: "Réunion",
+  tags: ["#Projet", "projet", " Idée "], people: ["@Marie", "Marie", "Paul"],
+});
+ok("tags stripped/lowercased/deduped", JSON.stringify(te.tags) === JSON.stringify(["projet", "idée"]));
+ok("people stripped/deduped (case kept)", JSON.stringify(te.people) === JSON.stringify(["Marie", "Paul"]));
+core.lockJournal();
+ok("re-unlock after tags/people", !!core.unlockJournal(j2reg.id, "pw12345"));
+const te2 = core.listEntries().find((e) => e.id === te.id);
+ok("tags/people intact after lock", te2.tags.includes("projet") && te2.people.includes("Marie"));
+const exp4 = core.exportData();
+ok("export carries tags/people", JSON.stringify(exp4).includes("projet") && JSON.stringify(exp4).includes("Marie"));
+
 console.log(`\n${pass} checks passed.`);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log("(temp dir cleaned)");

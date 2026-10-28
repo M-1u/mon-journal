@@ -31,6 +31,10 @@ contextBridge.exposeInMainWorld("journalAPI", {
   getGoals: () => ipcRenderer.invoke("goals:get"),
   setGoals: (list) => ipcRenderer.invoke("goals:set", list),
 
+  // Travel log
+  getTravel: () => ipcRenderer.invoke("travel:get"),
+  setTravel: (obj) => ipcRenderer.invoke("travel:set", obj),
+
   // Export / import
   exportJournal: () => ipcRenderer.invoke("journal:export"),
   importJournal: () => ipcRenderer.invoke("journal:import"),

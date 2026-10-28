@@ -26,6 +26,9 @@ export default defineConfig({
           if (!id.includes("node_modules")) return;
           if (id.includes("@tiptap") || id.includes("prosemirror")) return "editor";
           if (id.includes("marked") || id.includes("turndown")) return "markdown";
+          // Travel map data/libs — only pulled in by the lazy TravelView, so
+          // keep them in their own chunk (never in the eager "vendor" one).
+          if (id.includes("world-atlas") || id.includes("topojson") || id.includes("i18n-iso-countries")) return "geo";
           if (id.includes("react") || id.includes("/scheduler/")) return "react";
           return "vendor";
         },

@@ -107,6 +107,13 @@ export default function EntryReadView({ entry, activities, goals, onEdit, onDele
         />
       ) : null}
 
+      {(entry.tags?.length || entry.people?.length) ? (
+        <div className="de-labels" style={{ marginTop: 16 }}>
+          {(entry.tags || []).map((tg) => <span className="lbl-tag" key={"t" + tg}>#{tg}</span>)}
+          {(entry.people || []).map((p) => <span className="lbl-person" key={"p" + p}>@{p}</span>)}
+        </div>
+      ) : null}
+
       {imgs.length ? (
         <div className="er-photos">
           {imgs.map((im, i) => (

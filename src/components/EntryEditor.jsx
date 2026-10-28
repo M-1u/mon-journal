@@ -8,6 +8,7 @@ import { t } from "../lib/i18n.js";
 import MarkdownEditor from "./MarkdownEditor.jsx";
 import PhotoStrip from "./PhotoStrip.jsx";
 import ActivityPicker from "./ActivityPicker.jsx";
+import ChipInput from "./ChipInput.jsx";
 import { IconChevronLeft, IconCheck, IconTrash, IconClose, IconStar, IconMapPin } from "./Icons.jsx";
 
 function nowTime() {
@@ -23,7 +24,7 @@ const TEMPLATES = [
 ];
 
 // Full form to create or edit one entry.
-export default function EntryEditor({ date, entry, activities, goals, placeSuggestions, onSave, onDelete, onCancel }) {
+export default function EntryEditor({ date, entry, activities, goals, placeSuggestions, tagSuggestions, peopleSuggestions, onSave, onDelete, onCancel }) {
   const isNew = !entry;
   const [time, setTime] = useState(entry?.time || nowTime());
   const [mood, setMood] = useState(entry?.mood ?? null);
@@ -34,6 +35,8 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
   const [place, setPlace] = useState(entry?.place || "");
   const [weather, setWeather] = useState(entry?.weather || null);
   const [favorite, setFavorite] = useState(!!entry?.favorite);
+  const [tags, setTags] = useState(entry?.tags || []);
+  const [people, setPeople] = useState(entry?.people || []);
   const [dragOver, setDragOver] = useState(false);
 
   async function addImageFiles(fileList) {
@@ -78,11 +81,12 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
   }
 
   function save() {
-    onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images, place: place.trim(), weather, favorite });
+    onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images, place: place.trim(), weather, favorite, tags, people });
   }
 
   const canSave =
-    mood != null || text.trim() || acts.length || images.length || goalIds.length || place.trim() || weather;
+    mood != null || text.trim() || acts.length || images.length || goalIds.length ||
+    place.trim() || weather || tags.length || people.length;
 
   return (
     <div
@@ -168,6 +172,33 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
 
       <p className="section-label">{t("editor.activities")}</p>
       <ActivityPicker activities={activities} selected={acts} onToggle={toggleAct} />
+
+      <div className="chip-fields">
+        <div>
+          <p className="section-label" style={{ marginTop: 24 }}>{t("editor.tags")}</p>
+          <ChipInput
+            values={tags}
+            onChange={setTags}
+            prefix="#"
+            placeholder={t("editor.tagsPlaceholder")}
+            suggestions={tagSuggestions || []}
+            listId="tag-suggestions"
+            ariaLabel={t("editor.tags")}
+          />
+        </div>
+        <div>
+          <p className="section-label" style={{ marginTop: 24 }}>{t("editor.people")}</p>
+          <ChipInput
+            values={people}
+            onChange={setPeople}
+            prefix="@"
+            placeholder={t("editor.peoplePlaceholder")}
+            suggestions={peopleSuggestions || []}
+            listId="people-suggestions"
+            ariaLabel={t("editor.people")}
+          />
+        </div>
+      </div>
 
       <p className="section-label" style={{ marginTop: 24 }}>{t("editor.goals")}</p>
       {goals && goals.length ? (

@@ -372,6 +372,9 @@ function registerIpc() {
   ipcMain.handle("goals:get", () => core.getGoals());
   ipcMain.handle("goals:set", (_e, list) => core.setGoals(list));
 
+  ipcMain.handle("travel:get", () => core.getTravel());
+  ipcMain.handle("travel:set", (_e, obj) => core.setTravel(obj));
+
   ipcMain.handle("settings:get", () => core.readSettings());
   ipcMain.handle("settings:set", (_e, patch) => {
     const merged = core.writeSettings(patch);

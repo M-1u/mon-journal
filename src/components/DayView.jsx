@@ -50,6 +50,12 @@ function EntryCard({ entry, actMap, onClick }) {
           </div>
         ) : null}
         {entry.text?.trim() ? <div className="de-note">{excerpt(entry.text)}</div> : null}
+        {(entry.tags?.length || entry.people?.length) ? (
+          <div className="de-labels">
+            {(entry.tags || []).map((tg) => <span className="lbl-tag" key={"t" + tg}>#{tg}</span>)}
+            {(entry.people || []).map((p) => <span className="lbl-person" key={"p" + p}>@{p}</span>)}
+          </div>
+        ) : null}
         {imgs.length ? (
           <div className="de-thumbs">
             {imgs.slice(0, 5).map((im, i) => (
@@ -62,7 +68,7 @@ function EntryCard({ entry, actMap, onClick }) {
   );
 }
 
-export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, placeSuggestions, onDateChange, onSaveEntry, onDeleteEntry, onToggleFavorite }) {
+export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, placeSuggestions, tagSuggestions, peopleSuggestions, onDateChange, onSaveEntry, onDeleteEntry, onToggleFavorite }) {
   const [editing, setEditing] = useState(null); // null | 'new' | entry
   const [viewing, setViewing] = useState(null); // null | entry (read mode)
   const [saveError, setSaveError] = useState("");
@@ -111,6 +117,8 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
             activities={activities}
             goals={goals}
             placeSuggestions={placeSuggestions}
+            tagSuggestions={tagSuggestions}
+            peopleSuggestions={peopleSuggestions}
             onSave={handleSave}
             onDelete={handleDelete}
             onCancel={() => { setEditing(null); setSaveError(""); }}

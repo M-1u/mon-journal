@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback, lazy, Suspense } from "react";
 import Sidebar from "./components/Sidebar.jsx";
 import DayView from "./components/DayView.jsx";
 import CalendarView from "./components/CalendarView.jsx";
@@ -9,6 +9,8 @@ import SettingsView from "./components/SettingsView.jsx";
 import GoalsView from "./components/GoalsView.jsx";
 import SearchView from "./components/SearchView.jsx";
 import LockScreen from "./components/LockScreen.jsx";
+// Travel view bundles the world map + country data; load it on demand.
+const TravelView = lazy(() => import("./components/TravelView.jsx"));
 import { storage } from "./lib/storage.js";
 import { todayKey } from "./lib/date.js";
 import { getLang, setLang, t } from "./lib/i18n.js";
@@ -43,23 +45,28 @@ export default function App() {
   const [entries, setEntries] = useState([]); // flat list of entries
   const [activities, setActivities] = useState([]);
   const [goals, setGoals] = useState([]);
+  const [travel, setTravel] = useState({ countries: {}, cities: [] });
+  const travelRef = useRef(travel);
+  travelRef.current = travel;
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [storageRoot, setStorageRoot] = useState("");
   const [newEntrySignal, setNewEntrySignal] = useState(0);
   const [updateReady, setUpdateReady] = useState(false);
 
   const enterJournal = useCallback(async (journal) => {
-    const [s, list, acts, gls, root] = await Promise.all([
+    const [s, list, acts, gls, trv, root] = await Promise.all([
       storage.getSettings(),
       storage.listEntries(),
       storage.getActivities(),
       storage.getGoals(),
+      storage.getTravel(),
       storage.getStorageRoot(),
     ]);
     setSettings({ ...DEFAULT_SETTINGS, ...s });
     setEntries(list);
     setActivities(acts);
     setGoals(gls);
+    setTravel(trv || { countries: {}, cities: [] });
     setStorageRoot(root);
     setJournalName(journal.name);
     setView("today");
@@ -124,6 +131,15 @@ export default function App() {
     return out.slice(0, 50);
   }, [entries]);
 
+  // Tags / people already used, ordered by frequency, for autocomplete.
+  const freqList = (pick) => {
+    const count = {};
+    for (const e of entries) for (const v of pick(e) || []) count[v] = (count[v] || 0) + 1;
+    return Object.entries(count).sort((a, b) => b[1] - a[1]).map(([v]) => v);
+  };
+  const tagSuggestions = useMemo(() => freqList((e) => e.tags), [entries]);
+  const peopleSuggestions = useMemo(() => freqList((e) => e.people), [entries]);
+
   // --- Auth handlers ---
   const handleUnlock = useCallback(
     async (id, password) => {
@@ -146,6 +162,7 @@ export default function App() {
     setEntries([]);
     setActivities([]);
     setGoals([]);
+    setTravel({ countries: {}, cities: [] });
     setSettings(DEFAULT_SETTINGS);
     setJournalName("");
     setJournals(await storage.listJournals());
@@ -194,6 +211,36 @@ export default function App() {
     setGoals(saved);
   }, []);
 
+  // All travel mutations compute from travelRef.current (always the latest),
+  // so rapid map clicks never lose updates. We update state optimistically and
+  // persist in the background.
+  const applyTravel = useCallback(async (next) => {
+    travelRef.current = next;
+    setTravel(next);
+    await storage.setTravel(next);
+  }, []);
+  const handleCycleCountry = useCallback((alpha2) => {
+    if (!alpha2) return;
+    const cs = travelRef.current.countries || {};
+    const cur = cs[alpha2];
+    const nextStatus = cur === "visited" ? "wishlist" : cur === "wishlist" ? undefined : "visited";
+    const nc = { ...cs };
+    if (nextStatus) nc[alpha2] = nextStatus;
+    else delete nc[alpha2];
+    applyTravel({ ...travelRef.current, countries: nc });
+  }, [applyTravel]);
+  const handleRemoveCountry = useCallback((alpha2) => {
+    const nc = { ...travelRef.current.countries };
+    delete nc[alpha2];
+    applyTravel({ ...travelRef.current, countries: nc });
+  }, [applyTravel]);
+  const handleAddCity = useCallback((city) => {
+    applyTravel({ ...travelRef.current, cities: [...(travelRef.current.cities || []), city] });
+  }, [applyTravel]);
+  const handleRemoveCity = useCallback((id) => {
+    applyTravel({ ...travelRef.current, cities: (travelRef.current.cities || []).filter((c) => c.id !== id) });
+  }, [applyTravel]);
+
   const changeLang = useCallback((l) => {
     setLang(l);
     document.documentElement.lang = l;
@@ -207,14 +254,16 @@ export default function App() {
   }, []);
 
   const handleImported = useCallback(async () => {
-    const [list, acts, gls] = await Promise.all([
+    const [list, acts, gls, trv] = await Promise.all([
       storage.listEntries(),
       storage.getActivities(),
       storage.getGoals(),
+      storage.getTravel(),
     ]);
     setEntries(list);
     setActivities(acts);
     setGoals(gls);
+    setTravel(trv || { countries: {}, cities: [] });
   }, []);
 
   // Auto-lock after a period of inactivity (per-journal setting, minutes).
@@ -310,6 +359,8 @@ export default function App() {
             goals={goals}
             newEntrySignal={newEntrySignal}
             placeSuggestions={placeSuggestions}
+            tagSuggestions={tagSuggestions}
+            peopleSuggestions={peopleSuggestions}
             onDateChange={setDate}
             onSaveEntry={handleSaveEntry}
             onDeleteEntry={handleDeleteEntry}
@@ -321,6 +372,18 @@ export default function App() {
         )}
         {view === "timeline" && (
           <TimelineView entries={entries} activities={activities} onOpenDay={openDay} />
+        )}
+        {view === "travel" && (
+          <Suspense fallback={<div className="view"><div className="empty">{t("common.loading")}</div></div>}>
+            <TravelView
+              travel={travel}
+              lang={lang}
+              onCycleCountry={handleCycleCountry}
+              onRemoveCountry={handleRemoveCountry}
+              onAddCity={handleAddCity}
+              onRemoveCity={handleRemoveCity}
+            />
+          </Suspense>
         )}
         {view === "goals" && (
           <GoalsView goals={goals} entries={entries} onChange={handleGoalsChange} />

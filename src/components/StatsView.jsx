@@ -92,6 +92,17 @@ export default function StatsView({ entries, entriesByDate, activities }) {
     .slice(0, 8);
   const maxP = Math.max(1, ...topPlaces.map((x) => x.n));
 
+  // Top tags and people
+  const freq = (pick) => {
+    const c = {};
+    for (const e of filled) for (const v of pick(e) || []) c[v] = (c[v] || 0) + 1;
+    return Object.entries(c).map(([v, n]) => ({ v, n })).sort((a, b) => b.n - a.n).slice(0, 10);
+  };
+  const topTags = freq((e) => e.tags);
+  const topPeople = freq((e) => e.people);
+  const maxTag = Math.max(1, ...topTags.map((x) => x.n));
+  const maxPerson = Math.max(1, ...topPeople.map((x) => x.n));
+
   return (
     <div className="view">
       <h1 className="page-title">{t("stats.title")}</h1>
@@ -163,6 +174,32 @@ export default function StatsView({ entries, entriesByDate, activities }) {
               <div className="dist-track">
                 <div className="dist-fill" style={{ width: `${(n / maxP) * 100}%`, background: "var(--accent)" }} />
               </div>
+              <span className="cnt">{n}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {topTags.length > 0 && (
+        <div className="card panel">
+          <h3>{t("stats.topTags")}</h3>
+          {topTags.map(({ v, n }) => (
+            <div className="dist-row" key={v}>
+              <span className="lbl"><span className="lbl-tag">#{v}</span></span>
+              <div className="dist-track"><div className="dist-fill" style={{ width: `${(n / maxTag) * 100}%`, background: "var(--accent)" }} /></div>
+              <span className="cnt">{n}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {topPeople.length > 0 && (
+        <div className="card panel">
+          <h3>{t("stats.topPeople")}</h3>
+          {topPeople.map(({ v, n }) => (
+            <div className="dist-row" key={v}>
+              <span className="lbl"><span className="lbl-person">@{v}</span></span>
+              <div className="dist-track"><div className="dist-fill" style={{ width: `${(n / maxPerson) * 100}%`, background: "var(--accent)" }} /></div>
               <span className="cnt">{n}</span>
             </div>
           ))}

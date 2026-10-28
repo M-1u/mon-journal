@@ -29,6 +29,23 @@ function lsWrite(key, val) {
 
 const jkey = (suffix) => `monjournal.j.${fbActiveId}.${suffix}`;
 
+// Mirror of journal-core's normStrList (tags / people cleanup).
+function normStrList(list, lower) {
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  const out = [];
+  for (const raw of list) {
+    let s = String(raw || "").replace(/^[#@]+/, "").trim();
+    if (lower) s = s.toLowerCase();
+    if (!s) continue;
+    const key = s.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(s);
+  }
+  return out;
+}
+
 const DEFAULT_SETTINGS = {
   theme: "system",
   accent: "#3da35d",
@@ -167,6 +184,8 @@ export const storage = {
       place: typeof entry.place === "string" ? entry.place.trim() : "",
       weather: entry.weather || null,
       favorite: !!entry.favorite,
+      tags: normStrList(entry.tags, true),
+      people: normStrList(entry.people, false),
       createdAt: i >= 0 ? list[i].createdAt : now,
       updatedAt: now,
     };
@@ -213,6 +232,20 @@ export const storage = {
     if (!fbActiveId) return [];
     lsWrite(jkey("goals"), list);
     return list;
+  },
+
+  // --- Travel log ---
+  async getTravel() {
+    if (isElectron) return api.getTravel();
+    if (!fbActiveId) return { countries: {}, cities: [] };
+    return lsRead(jkey("travel"), { countries: {}, cities: [] });
+  },
+  async setTravel(obj) {
+    if (isElectron) return api.setTravel(obj);
+    if (!fbActiveId) return { countries: {}, cities: [] };
+    const clean = { countries: obj?.countries || {}, cities: Array.isArray(obj?.cities) ? obj.cities : [] };
+    lsWrite(jkey("travel"), clean);
+    return clean;
   },
 
   // --- Settings ---
@@ -373,6 +406,8 @@ function fbApplyImport(obj) {
       place: typeof e.place === "string" ? e.place : "",
       weather: e.weather || null,
       favorite: !!e.favorite,
+      tags: normStrList(e.tags, true),
+      people: normStrList(e.people, false),
       createdAt: e.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

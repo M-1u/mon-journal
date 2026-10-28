@@ -2057,3 +2057,71 @@ body.privacy-blur .main::after {
   margin-top: 14px; color: var(--ink-soft, var(--ink-faint)); font-size: 14px;
 }
 .er-place { color: var(--ink-faint); }
+
+/* ── Travel view (world map, countries, cities) ───────────────────────── */
+:root { --map-sea: #eaf1f6; --map-land: #d7dee6; --map-stroke: #ffffff; }
+:root[data-theme="dark"] { --map-sea: #141a21; --map-land: #2a3340; --map-stroke: #141a21; }
+
+.map-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.map-legend { display: flex; align-items: center; gap: 14px; font-size: 12.5px; color: var(--ink-faint); flex-wrap: wrap; }
+.map-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.map-hint { color: var(--ink); font-weight: 600; }
+.map-wrap { width: 100%; border-radius: 12px; overflow: hidden; background: var(--map-sea); }
+.world-map { display: block; width: 100%; height: auto; }
+.world-map .country { cursor: pointer; transition: filter .1s ease; }
+.world-map .country:hover { filter: brightness(1.12) saturate(1.1); }
+.world-map .country.inert { cursor: default; }
+.map-foot { color: var(--ink-faint); font-size: 12px; margin: 10px 2px 0; }
+
+.country-group { margin-top: 12px; }
+.cg-label { font-size: 13px; font-weight: 600; color: var(--ink-soft, var(--ink-faint)); margin-bottom: 8px; }
+.country-chips, .city-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.country-chip, .city-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px;
+  border-radius: 999px; font-size: 13px; border: 1px solid var(--border); background: var(--surface-2);
+}
+.country-chip.visited { border-color: var(--accent); color: var(--accent); }
+.country-chip.wish { border-color: #f0b429; color: #cf9510; }
+.city-chip.wishlist { border-style: dashed; }
+.city-country { color: var(--ink-faint); }
+.country-chip button, .city-chip button {
+  border: none; background: transparent; cursor: pointer; color: inherit; opacity: .6; padding: 0; display: inline-grid; place-items: center;
+}
+.country-chip button:hover, .city-chip button:hover { opacity: 1; }
+
+.city-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.city-add .city-name { flex: 1 1 180px; }
+.city-add input, .city-add select {
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface-2); color: var(--ink); font-size: 14px; outline: none;
+}
+.city-add input:focus, .city-add select:focus { border-color: var(--accent); }
+
+/* ── Tags & people (chips input + labels) ─────────────────────────────── */
+.chip-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 560px) { .chip-fields { grid-template-columns: 1fr; } }
+
+.chip-input {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  min-height: 42px; padding: 6px 8px; cursor: text;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+}
+.chip-input:focus-within { border-color: var(--accent); }
+.chip-input .chip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+  font-size: 13px; color: var(--ink);
+}
+.chip-input .chip button {
+  border: none; background: transparent; cursor: pointer; color: var(--ink-faint);
+  padding: 0; display: inline-grid; place-items: center;
+}
+.chip-input .chip button:hover { color: var(--danger, #e5544b); }
+.chip-draft { flex: 1; min-width: 90px; border: none; background: transparent; color: var(--ink); font-size: 14px; outline: none; padding: 4px 2px; }
+
+.de-labels { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.lbl-tag, .lbl-person {
+  display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; font-weight: 600;
+}
+.lbl-tag { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.lbl-person { background: color-mix(in srgb, #8b5cf6 18%, transparent); color: #8b5cf6; }

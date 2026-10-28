@@ -319,6 +319,24 @@ function listEntries() {
   return all;
 }
 
+// Normalize a list of free-form labels (tags / people): strip a leading #/@,
+// trim, drop empties, de-duplicate. Tags are lower-cased; people keep their case.
+function normStrList(list, lower) {
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  const out = [];
+  for (const raw of list) {
+    let s = String(raw || "").replace(/^[#@]+/, "").trim();
+    if (lower) s = s.toLowerCase();
+    if (!s) continue;
+    const key = s.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(s);
+  }
+  return out;
+}
+
 function upsertEntry(entry) {
   if (!activeJournal) return null;
   const date = entry.date;
@@ -338,6 +356,8 @@ function upsertEntry(entry) {
     place: typeof entry.place === "string" ? entry.place.trim() : "",
     weather: entry.weather || null,
     favorite: !!entry.favorite,
+    tags: normStrList(entry.tags, true),
+    people: normStrList(entry.people, false),
     createdAt: i >= 0 ? day[i].createdAt : now,
     updatedAt: now,
   };
@@ -413,6 +433,45 @@ function setGoals(list) {
   return clean;
 }
 
+// --- Travel log (countries / cities visited + wishlist) ---
+// Shape: { countries: { [alpha2]: "visited"|"wishlist" }, cities: [{ id, name, country, status }] }
+const travelFile = () => path.join(activeJournal.path, "travel.json");
+const EMPTY_TRAVEL = { countries: {}, cities: [] };
+function normalizeTravel(obj) {
+  const countries = {};
+  if (obj && obj.countries && typeof obj.countries === "object") {
+    for (const [code, status] of Object.entries(obj.countries)) {
+      if (status === "visited" || status === "wishlist") countries[String(code).toUpperCase()] = status;
+    }
+  }
+  const cities = Array.isArray(obj && obj.cities)
+    ? obj.cities
+        .filter((c) => c && c.name)
+        .map((c) => ({
+          id: c.id || crypto.randomUUID(),
+          name: String(c.name).trim(),
+          country: (c.country ? String(c.country).toUpperCase() : "").slice(0, 2),
+          status: c.status === "wishlist" ? "wishlist" : "visited",
+        }))
+    : [];
+  return { countries, cities };
+}
+function getTravel() {
+  if (!activeJournal) return { ...EMPTY_TRAVEL };
+  try {
+    return normalizeTravel(readBlob(travelFile()));
+  } catch {
+    return { ...EMPTY_TRAVEL };
+  }
+}
+function setTravel(obj) {
+  if (!activeJournal) return { ...EMPTY_TRAVEL };
+  ensureDirs();
+  const clean = normalizeTravel(obj);
+  writeBlob(travelFile(), clean);
+  return clean;
+}
+
 // --- Export / import (portable, decrypted backup) ---
 // Produces a single self-contained object with all decrypted data + images
 // (base64). Safe to save anywhere as JSON. importData() merges it back.
@@ -436,6 +495,7 @@ function exportData() {
     exportedAt: new Date().toISOString(),
     activities: getActivities(),
     goals: getGoals(),
+    travel: getTravel(),
     entries,
     images,
   };
@@ -466,6 +526,20 @@ function importData(obj) {
   const goalIds = new Set(goals.map((g) => g.id));
   for (const g of obj.goals || []) if (g && !goalIds.has(g.id)) goals.push(g);
   setGoals(goals);
+
+  // Merge travel: countries union (visited wins over wishlist), cities by id.
+  if (obj.travel) {
+    const cur = getTravel();
+    const countries = { ...cur.countries };
+    for (const [code, status] of Object.entries(obj.travel.countries || {})) {
+      if (countries[code] === "visited") continue;
+      countries[code] = status;
+    }
+    const cityIds = new Set(cur.cities.map((c) => c.id));
+    const cities = [...cur.cities];
+    for (const c of obj.travel.cities || []) if (c && !cityIds.has(c.id)) cities.push(c);
+    setTravel({ countries, cities });
+  }
 
   // Upsert entries (keep their ids so re-importing is idempotent).
   let count = 0;
@@ -547,6 +621,8 @@ module.exports = {
   setActivities,
   getGoals,
   setGoals,
+  getTravel,
+  setTravel,
   exportData,
   importData,
   readSettings,
