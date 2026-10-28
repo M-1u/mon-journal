@@ -232,6 +232,24 @@ core.lockJournal();
 ok("re-unlock after multi-day", !!core.unlockJournal(mdJournal.id, "pw-multi"));
 ok("multi-day intact after lock", core.listEntries().find((e) => e.id === md.id).endDate === "2026-11-03");
 
+// 19. Backups: copy encrypted folder + registry, then prune to keep N
+const bkDest = path.join(tmp, "backups");
+fs.mkdirSync(bkDest, { recursive: true });
+let bkRes;
+for (let i = 0; i < 4; i++) {
+  bkRes = core.backupNow(bkDest, 2);
+}
+ok("backup returns ok with a path", bkRes.ok && fs.existsSync(bkRes.path));
+ok("backup contains encrypted journal + registry", fs.existsSync(path.join(bkRes.path, "journal", "entries")) && fs.existsSync(path.join(bkRes.path, "journals.json")));
+const bkList = fs.readdirSync(bkDest).filter((n) => n.startsWith("monjournal-"));
+ok("prune keeps only N backups", bkList.length === 2);
+// The backed-up journal files are still encrypted envelopes (no plaintext).
+const bkEntry = fs.readdirSync(path.join(bkRes.path, "journal", "entries"))[0];
+if (bkEntry) {
+  const raw = fs.readFileSync(path.join(bkRes.path, "journal", "entries", bkEntry), "utf8");
+  ok("backup stays encrypted", JSON.parse(raw).enc === 1);
+}
+
 console.log(`\n${pass} checks passed.`);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log("(temp dir cleaned)");

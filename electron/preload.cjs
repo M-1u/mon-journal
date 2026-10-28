@@ -60,6 +60,10 @@ contextBridge.exposeInMainWorld("journalAPI", {
   openStorageRoot: () => ipcRenderer.invoke("storage:openRoot"),
   moveJournal: () => ipcRenderer.invoke("journal:move"),
 
+  // Backups
+  pickBackupFolder: () => ipcRenderer.invoke("backup:pickFolder"),
+  backupNow: () => ipcRenderer.invoke("backup:now"),
+
   // PDF + updates
   exportPdf: () => ipcRenderer.invoke("journal:exportPdf"),
   checkUpdates: () => ipcRenderer.invoke("app:checkUpdates"),

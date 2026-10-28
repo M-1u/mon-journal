@@ -165,6 +165,38 @@ function currentJournal() {
 function activeJournalPath() {
   return activeJournal ? activeJournal.path : "";
 }
+
+// Encrypted backup: copies the journal's (already encrypted) data folder plus
+// the registry (which holds the key material) into a timestamped folder. The
+// backup stays encrypted and is restored with the journal's password. Keeps the
+// newest `keep` backups for this journal and prunes the rest.
+function backupNow(destFolder, keep = 7) {
+  if (!activeJournal || !destFolder) return { ok: false, error: "no-journal-or-folder" };
+  try {
+    const slug = path.basename(activeJournal.path);
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 23); // to the millisecond
+    const prefix = `monjournal-${slug}-`;
+    let dir = path.join(destFolder, prefix + stamp);
+    let n = 1;
+    while (fs.existsSync(dir)) dir = path.join(destFolder, `${prefix}${stamp}-${n++}`);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.cpSync(activeJournal.path, path.join(dir, "journal"), { recursive: true });
+    fs.copyFileSync(registryPath(), path.join(dir, "journals.json"));
+    let pruned = 0;
+    try {
+      const all = fs.readdirSync(destFolder).filter((n) => n.startsWith(prefix)).sort();
+      for (const name of all.slice(0, Math.max(0, all.length - Math.max(1, keep)))) {
+        fs.rmSync(path.join(destFolder, name), { recursive: true, force: true });
+        pruned++;
+      }
+    } catch {
+      /* pruning is best-effort */
+    }
+    return { ok: true, path: dir, pruned };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
 function changePassword(oldPassword, newPassword) {
   if (!activeJournal) return { ok: false, error: "locked" };
   const reg = loadRegistry();
@@ -689,6 +721,10 @@ const DEFAULT_SETTINGS = {
   autoLockMinutes: 0, // 0 = disabled
   privacyBlur: false, // blur content when the window loses focus
   spellcheck: true, // native spell checking in the editor
+  backupEnabled: false, // automatic encrypted backups
+  backupFolder: "", // destination folder for backups
+  backupKeep: 7, // how many backups to retain
+  lastBackup: "", // ISO timestamp of the last successful backup
 };
 function readSettings() {
   if (!activeJournal) return { ...DEFAULT_SETTINGS };
@@ -753,6 +789,7 @@ module.exports = {
   setTasks,
   getTrackers,
   setTrackers,
+  backupNow,
   exportData,
   importData,
   readSettings,

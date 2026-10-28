@@ -325,6 +325,24 @@ async function checkForUpdates() {
 }
 
 // ---------------------------------------------------------------------------
+// Automatic backups (once per day, on unlock)
+// ---------------------------------------------------------------------------
+
+function maybeAutoBackup() {
+  try {
+    if (!core.currentJournal()) return;
+    const s = core.readSettings();
+    if (!s.backupEnabled || !s.backupFolder) return;
+    const last = s.lastBackup ? Date.parse(s.lastBackup) : 0;
+    if (Date.now() - last < 20 * 60 * 60 * 1000) return; // at most once per ~day
+    const r = core.backupNow(s.backupFolder, s.backupKeep);
+    if (r.ok) core.writeSettings({ lastBackup: new Date().toISOString() });
+  } catch {
+    /* never block the app on a backup */
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Image protocol (decrypts on the fly)
 // ---------------------------------------------------------------------------
 
@@ -363,6 +381,7 @@ function registerIpc() {
     if (r) {
       scheduleReminder();
       applySpellcheck();
+      setTimeout(maybeAutoBackup, 2000); // deferred so unlock stays snappy
     }
     return r;
   });
@@ -402,6 +421,23 @@ function registerIpc() {
     scheduleReminder();
     if ("spellcheck" in patch) applySpellcheck();
     return merged;
+  });
+
+  ipcMain.handle("backup:pickFolder", async () => {
+    const res = await dialog.showOpenDialog(mainWindow, {
+      title: "Choisir le dossier de sauvegarde",
+      properties: ["openDirectory", "createDirectory"],
+    });
+    if (res.canceled || !res.filePaths[0]) return { ok: false, canceled: true };
+    core.writeSettings({ backupFolder: res.filePaths[0] });
+    return { ok: true, path: res.filePaths[0] };
+  });
+  ipcMain.handle("backup:now", () => {
+    const s = core.readSettings();
+    if (!s.backupFolder) return { ok: false, error: "no-folder" };
+    const r = core.backupNow(s.backupFolder, s.backupKeep);
+    if (r.ok) core.writeSettings({ lastBackup: new Date().toISOString() });
+    return r;
   });
 
   ipcMain.handle("journal:exportPdf", () => exportPdf());

@@ -27,6 +27,21 @@ export default function SettingsView({
   const [moveMsg, setMoveMsg] = useState("");
   const [pdfMsg, setPdfMsg] = useState("");
   const [updMsg, setUpdMsg] = useState("");
+  const [bkMsg, setBkMsg] = useState("");
+
+  async function pickBackupFolder() {
+    const res = await window.journalAPI?.pickBackupFolder();
+    if (res?.ok) onChange({ backupFolder: res.path });
+  }
+  async function backupNow() {
+    if (!settings.backupFolder) { await pickBackupFolder(); return; }
+    setBkMsg(t("set.bkWorking"));
+    const res = await window.journalAPI?.backupNow();
+    if (res?.ok) { onChange({ lastBackup: new Date().toISOString() }); setBkMsg(t("set.bkDone")); }
+    else setBkMsg(t("set.bkError"));
+    setTimeout(() => setBkMsg(""), 5000);
+  }
+  const BK_KEEP = [3, 7, 14, 30];
 
   async function exportPdf() {
     setPdfMsg(t("set.pdfWorking"));
@@ -214,6 +229,54 @@ export default function SettingsView({
               </div>
             </div>
             <button className="btn" onClick={checkUpdates}>{t("set.updBtn")}</button>
+          </div>
+        </div>
+      )}
+
+      {isElectron && (
+        <div className="card" style={{ marginTop: 18 }}>
+          <div className="set-row">
+            <div className="info">
+              <div className="t">{t("set.backup")}</div>
+              <div className="d">{t("set.backupSub")}</div>
+            </div>
+            <button
+              className={"switch" + (settings.backupEnabled ? " on" : "")}
+              onClick={() => { const on = !settings.backupEnabled; onChange({ backupEnabled: on }); if (on && !settings.backupFolder) pickBackupFolder(); }}
+            />
+          </div>
+          {settings.backupEnabled && (
+            <>
+              <div className="set-row">
+                <div className="info">
+                  <div className="t">{t("set.backupFolder")}</div>
+                  <div className="d" style={{ wordBreak: "break-all" }}>
+                    {settings.backupFolder || t("set.backupNoFolder")}
+                  </div>
+                </div>
+                <button className="btn" onClick={pickBackupFolder}>{t("set.backupPick")}</button>
+              </div>
+              <div className="set-row">
+                <div className="info">
+                  <div className="t">{t("set.backupKeep")}</div>
+                  <div className="d">{t("set.backupKeepSub")}</div>
+                </div>
+                <select value={settings.backupKeep ?? 7} onChange={(e) => onChange({ backupKeep: Number(e.target.value) })}>
+                  {BK_KEEP.map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </div>
+            </>
+          )}
+          <div className="set-row">
+            <div className="info">
+              <div className="t">{t("set.backupNow")}</div>
+              <div className="d">
+                {bkMsg ? <span style={{ color: "var(--accent)", fontWeight: 600 }}>{bkMsg}</span>
+                  : settings.lastBackup ? t("set.backupLast", { when: new Date(settings.lastBackup).toLocaleString() })
+                  : t("set.backupNever")}
+              </div>
+            </div>
+            <button className="btn" onClick={backupNow}>{t("set.backupNowBtn")}</button>
           </div>
         </div>
       )}

@@ -23,6 +23,10 @@ const DEFAULT_SETTINGS = {
   autoLockMinutes: 0,
   privacyBlur: false,
   spellcheck: true,
+  backupEnabled: false,
+  backupFolder: "",
+  backupKeep: 7,
+  lastBackup: "",
 };
 
 function inkFor(hex) {
