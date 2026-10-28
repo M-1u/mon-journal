@@ -6,44 +6,55 @@
   --accent: #3da35d;
   --accent-ink: #ffffff;
 
-  --radius-lg: 22px;
-  --radius: 16px;
-  --radius-sm: 11px;
+  --radius-lg: 18px;
+  --radius: 13px;
+  --radius-sm: 9px;
 
-  --font: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue",
-    Arial, sans-serif;
+  /* UI sans — clean humanist system stack (offline, no web fonts). */
+  --font: "Avenir Next", "Segoe UI Variable", "Segoe UI", system-ui,
+    -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Reading / headings serif — makes written entries feel like a real book. */
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Palatino LT STD",
+    "Hoefler Text", Georgia, "Times New Roman", serif;
 
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-2: 0 6px 24px rgba(0, 0, 0, 0.1);
+  /* Warm, paper-soft elevation instead of the usual flat grey SaaS shadow. */
+  --shadow-1: 0 1px 2px rgba(54, 48, 38, 0.05), 0 2px 7px rgba(54, 48, 38, 0.045);
+  --shadow-2: 0 8px 28px rgba(54, 48, 38, 0.12);
 }
 
-/* Light theme (default) */
+/* Light theme (default) — warm linen / ink on paper */
 :root,
 :root[data-theme="light"] {
-  --bg: #f4f6f8;
-  --bg-elev: #ffffff;
-  --surface: #ffffff;
-  --surface-2: #eef1f4;
-  --surface-hover: #e9edf1;
-  --border: #e2e6ea;
-  --ink: #1a2230;
-  --ink-dim: #5a6472;
-  --ink-faint: #9aa4b2;
+  --bg: #f2f0ea;
+  --bg-elev: #fbfaf6;
+  --surface: #fbfaf6;
+  --surface-2: #edeae1;
+  --surface-hover: #e7e3d8;
+  --border: #e5e0d5;
+  --ink: #2c2a26;
+  --ink-dim: #6c6860;
+  --ink-faint: #a8a39a;
+  --map-sea: #e9e4d9;
+  --map-land: #d8d2c4;
+  --map-stroke: #fbfaf6;
 }
 
-/* Dark theme */
+/* Dark theme — warm charcoal, like a leather notebook at night */
 :root[data-theme="dark"] {
-  --bg: #0f1216;
-  --bg-elev: #171b21;
-  --surface: #1a1f26;
-  --surface-2: #212831;
-  --surface-hover: #262e38;
-  --border: #2a323d;
-  --ink: #eef2f6;
-  --ink-dim: #a3adba;
-  --ink-faint: #6c7684;
+  --bg: #16151a;
+  --bg-elev: #201e24;
+  --surface: #201e24;
+  --surface-2: #28262f;
+  --surface-hover: #2f2c37;
+  --border: #322f39;
+  --ink: #ece7df;
+  --ink-dim: #a49e95;
+  --ink-faint: #6b6660;
+  --map-sea: #1c1a20;
+  --map-land: #322f39;
+  --map-stroke: #16151a;
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.35);
-  --shadow-2: 0 8px 30px rgba(0, 0, 0, 0.45);
+  --shadow-2: 0 10px 32px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -366,10 +377,11 @@ button {
    =========================================================================== */
 
 .page-title {
-  font-size: 26px;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-  margin: 0 0 2px;
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 3px;
 }
 .page-sub {
   color: var(--ink-dim);
@@ -468,9 +480,10 @@ button {
   text-align: center;
 }
 .day-nav .date .d1 {
-  font-size: 22px;
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   text-transform: capitalize;
 }
 .day-nav .date .d2 {
@@ -479,12 +492,11 @@ button {
 }
 
 .section-label {
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink-dim);
+  margin: 0 0 11px;
 }
 
 .mood-row {
@@ -661,8 +673,9 @@ button {
 .md-content .ProseMirror {
   min-height: 220px;
   padding: 16px 18px;
-  font-size: 15.5px;
-  line-height: 1.7;
+  font-family: var(--font-serif);
+  font-size: 16.5px;
+  line-height: 1.72;
   color: var(--ink);
   outline: none;
 }
@@ -1074,8 +1087,10 @@ button {
 }
 .panel h3 {
   margin: 0 0 16px;
-  font-size: 15px;
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 /* mood distribution */
@@ -1528,8 +1543,9 @@ input[type="time"] {
 }
 .ee-title {
   flex: 1;
-  font-size: 20px;
-  font-weight: 750;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 .ee-head input[type="time"] {
@@ -1789,9 +1805,11 @@ input[type="time"] {
 .er-mood-emoji { font-size: 30px; line-height: 1; }
 .er-note {
   margin-top: 20px;
-  font-size: 15.5px;
-  line-height: 1.7;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.72;
   color: var(--ink);
+  max-width: 64ch; /* comfortable reading measure */
 }
 .er-note :first-child { margin-top: 0; }
 .er-note :last-child { margin-bottom: 0; }
@@ -2059,8 +2077,6 @@ body.privacy-blur .main::after {
 .er-place { color: var(--ink-faint); }
 
 /* ── Travel view (world map, countries, cities) ───────────────────────── */
-:root { --map-sea: #eaf1f6; --map-land: #d7dee6; --map-stroke: #ffffff; }
-:root[data-theme="dark"] { --map-sea: #141a21; --map-land: #2a3340; --map-stroke: #141a21; }
 
 .map-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
 .map-legend { display: flex; align-items: center; gap: 14px; font-size: 12.5px; color: var(--ink-faint); flex-wrap: wrap; }

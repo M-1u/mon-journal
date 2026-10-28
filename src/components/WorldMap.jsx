@@ -80,9 +80,9 @@ export default function WorldMap({ paths, fillFor, onCountryClick, pins = [], ar
       >
         <rect x="0" y="0" width={W} height={H} fill="var(--map-sea, #eaf1f6)" />
         <g transform={`translate(${t.x} ${t.y}) scale(${t.k})`}>
-          {paths.map((c) => (
+          {paths.map((c, i) => (
             <path
-              key={c.id}
+              key={c.id + ":" + i}
               d={c.d}
               fill={fillFor(c.alpha2)}
               stroke="var(--map-stroke, #ffffff)"
