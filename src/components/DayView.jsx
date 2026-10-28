@@ -9,6 +9,8 @@ import { IconChevronLeft, IconChevronRight, IconPlus } from "./Icons.jsx";
 import { t } from "../lib/i18n.js";
 import EntryReadView from "./EntryReadView.jsx";
 import Memories from "./Memories.jsx";
+import TasksPanel from "./TasksPanel.jsx";
+import TrackersPanel from "./TrackersPanel.jsx";
 
 // The editor pulls in the (heavy) rich-text engine; load it only when needed.
 const EntryEditor = lazy(() => import("./EntryEditor.jsx"));
@@ -69,7 +71,7 @@ function EntryCard({ entry, actMap, trip, onClick }) {
   );
 }
 
-export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, placeSuggestions, tagSuggestions, peopleSuggestions, trips, onDateChange, onSaveEntry, onDeleteEntry, onToggleFavorite }) {
+export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, placeSuggestions, tagSuggestions, peopleSuggestions, trips, tasks, trackers, onDateChange, onSaveEntry, onDeleteEntry, onToggleFavorite, onTasksChange, onTrackersChange }) {
   const tripMap = {};
   for (const tr of trips || []) tripMap[tr.id] = tr;
   const [editing, setEditing] = useState(null); // null | 'new' | entry
@@ -189,6 +191,9 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
           </button>
 
           <Memories date={date} allEntries={allEntries || []} onOpenDay={onDateChange} />
+
+          <TrackersPanel trackers={trackers} date={date} onChange={onTrackersChange} />
+          {isToday(date) && <TasksPanel tasks={tasks} onChange={onTasksChange} />}
 
           {entries.length === 0 ? (
             <div className="empty">

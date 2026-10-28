@@ -254,6 +254,35 @@ export const storage = {
     return clean;
   },
 
+  // --- Tasks ---
+  async getTasks() {
+    if (isElectron) return api.getTasks();
+    if (!fbActiveId) return [];
+    return lsRead(jkey("tasks"), []);
+  },
+  async setTasks(list) {
+    if (isElectron) return api.setTasks(list);
+    if (!fbActiveId) return [];
+    const clean = Array.isArray(list) ? list : [];
+    lsWrite(jkey("tasks"), clean);
+    return clean;
+  },
+
+  // --- Trackers ---
+  async getTrackers() {
+    if (isElectron) return api.getTrackers();
+    if (!fbActiveId) return { defs: [], log: {} };
+    const t = lsRead(jkey("trackers"), { defs: [], log: {} });
+    return { defs: t.defs || [], log: t.log || {} };
+  },
+  async setTrackers(obj) {
+    if (isElectron) return api.setTrackers(obj);
+    if (!fbActiveId) return { defs: [], log: {} };
+    const clean = { defs: Array.isArray(obj?.defs) ? obj.defs : [], log: obj?.log || {} };
+    lsWrite(jkey("trackers"), clean);
+    return clean;
+  },
+
   // --- Settings ---
   async getSettings() {
     if (isElectron) return api.getSettings();

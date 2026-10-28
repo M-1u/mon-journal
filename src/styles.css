@@ -2220,3 +2220,63 @@ body.privacy-blur .main::after {
 .ts-dates { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0; }
 .ts-note { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 13px; }
 .trip-notes { width: 100%; resize: vertical; font-family: inherit; }
+
+/* ── Tasks & trackers (daily logbook) ─────────────────────────────────── */
+.panel.tasks-panel, .panel.trackers-panel { margin-top: 14px; }
+.panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.panel-head h3 { margin: 0; font-family: var(--font-serif); font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.panel-count { color: var(--ink-faint); font-size: 12.5px; }
+
+.task-add { display: flex; gap: 8px; margin-bottom: 10px; }
+.task-add input {
+  flex: 1; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface-2); color: var(--ink); font-size: 14px; outline: none;
+}
+.task-add input:focus { border-color: var(--accent); }
+.task-empty { color: var(--ink-faint); font-size: 13.5px; margin: 4px 2px; }
+.task-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.task { display: flex; align-items: center; gap: 11px; padding: 7px 4px; }
+.task-check {
+  width: 20px; height: 20px; flex: none; border: 2px solid var(--border); border-radius: 7px;
+  background: transparent; cursor: pointer; color: var(--accent-ink); display: grid; place-items: center; padding: 0;
+}
+.task-check:hover { border-color: var(--accent); }
+.task-check.on { background: var(--accent); border-color: var(--accent); }
+.task-text { flex: 1; font-size: 14.5px; }
+.task.done .task-text { color: var(--ink-faint); text-decoration: line-through; }
+.task-rm { border: none; background: transparent; cursor: pointer; color: var(--ink-faint); opacity: 0; transition: opacity .12s; }
+.task:hover .task-rm { opacity: .7; }
+.task-rm:hover { color: var(--danger, #e5544b); opacity: 1; }
+
+.tracker-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.tracker {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); font-size: 14px; color: var(--ink);
+}
+.tracker.check { cursor: pointer; }
+.tracker.check:hover { border-color: var(--accent); }
+.tracker.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface-2)); }
+.tracker.reached { border-color: var(--accent); }
+.trk-emoji { font-size: 16px; }
+.trk-name { font-weight: 500; }
+.trk-tick { color: var(--accent); font-weight: 700; }
+.trk-counter { display: inline-flex; align-items: center; gap: 8px; }
+.trk-counter button {
+  width: 24px; height: 24px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--ink); cursor: pointer; font-size: 15px; line-height: 1;
+}
+.trk-counter button:hover { border-color: var(--accent); color: var(--accent); }
+.trk-val { min-width: 34px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+.trk-val small { color: var(--ink-faint); font-weight: 400; }
+.trk-add select, .trk-add .trk-target {
+  padding: 9px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); color: var(--ink); font-size: 14px;
+}
+.trk-add .trk-target { width: 90px; }
+
+/* tracker sparklines in stats */
+.trk-stat { margin-bottom: 16px; }
+.trk-stat-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.trk-stat-name { font-weight: 600; font-size: 14px; }
+.trk-stat-sub { color: var(--ink-faint); font-size: 12px; }
+.trk-spark { display: flex; align-items: flex-end; gap: 2px; height: 56px; }
+.trk-spark-bar { flex: 1; border-radius: 3px 3px 0 0; min-height: 2px; }

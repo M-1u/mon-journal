@@ -35,6 +35,12 @@ contextBridge.exposeInMainWorld("journalAPI", {
   getTravel: () => ipcRenderer.invoke("travel:get"),
   setTravel: (obj) => ipcRenderer.invoke("travel:set", obj),
 
+  // Tasks & trackers
+  getTasks: () => ipcRenderer.invoke("tasks:get"),
+  setTasks: (list) => ipcRenderer.invoke("tasks:set", list),
+  getTrackers: () => ipcRenderer.invoke("trackers:get"),
+  setTrackers: (obj) => ipcRenderer.invoke("trackers:set", obj),
+
   // Export / import
   exportJournal: () => ipcRenderer.invoke("journal:export"),
   importJournal: () => ipcRenderer.invoke("journal:import"),

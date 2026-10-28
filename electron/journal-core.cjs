@@ -233,6 +233,8 @@ const imagesDir = () => path.join(activeJournal.path, "images");
 const settingsPath = () => path.join(activeJournal.path, "settings.json");
 const activitiesFile = () => path.join(activeJournal.path, "activities.json");
 const goalsFile = () => path.join(activeJournal.path, "goals.json");
+const tasksFile = () => path.join(activeJournal.path, "tasks.json");
+const trackersFile = () => path.join(activeJournal.path, "trackers.json");
 function ensureDirs() {
   fs.mkdirSync(entriesDir(), { recursive: true });
   fs.mkdirSync(imagesDir(), { recursive: true });
@@ -434,6 +436,73 @@ function setGoals(list) {
   return clean;
 }
 
+// --- Tasks (to-do with carry-over) ---
+// Task: { id, text, done, createdAt, doneAt }
+function getTasks() {
+  if (!activeJournal) return [];
+  try {
+    const list = readBlob(tasksFile());
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+function setTasks(list) {
+  if (!activeJournal) return [];
+  ensureDirs();
+  const clean = Array.isArray(list)
+    ? list.filter((t) => t && t.text).map((t) => ({
+        id: t.id || crypto.randomUUID(),
+        text: String(t.text).trim(),
+        done: !!t.done,
+        createdAt: t.createdAt || new Date().toISOString(),
+        doneAt: t.done ? t.doneAt || new Date().toISOString() : null,
+      }))
+    : [];
+  writeBlob(tasksFile(), clean);
+  return clean;
+}
+
+// --- Trackers (daily habits / metrics) ---
+// Shape: { defs: [{ id, emoji, name, type:"check"|"count", target }], log: { "YYYY-MM-DD": { [id]: number } } }
+const EMPTY_TRACKERS = { defs: [], log: {} };
+function getTrackers() {
+  if (!activeJournal) return { ...EMPTY_TRACKERS };
+  try {
+    const obj = readBlob(trackersFile());
+    return {
+      defs: Array.isArray(obj && obj.defs) ? obj.defs : [],
+      log: obj && obj.log && typeof obj.log === "object" ? obj.log : {},
+    };
+  } catch {
+    return { ...EMPTY_TRACKERS };
+  }
+}
+function setTrackers(obj) {
+  if (!activeJournal) return { ...EMPTY_TRACKERS };
+  ensureDirs();
+  const defs = Array.isArray(obj && obj.defs)
+    ? obj.defs.filter((d) => d && d.name).map((d) => ({
+        id: d.id || crypto.randomUUID(),
+        emoji: d.emoji || "✅",
+        name: String(d.name).trim(),
+        type: d.type === "count" ? "count" : "check",
+        target: typeof d.target === "number" ? d.target : null,
+      }))
+    : [];
+  const log = {};
+  if (obj && obj.log && typeof obj.log === "object") {
+    for (const [date, vals] of Object.entries(obj.log)) {
+      if (!vals || typeof vals !== "object") continue;
+      const clean = {};
+      for (const [id, v] of Object.entries(vals)) if (typeof v === "number" && v) clean[id] = v;
+      if (Object.keys(clean).length) log[date] = clean;
+    }
+  }
+  writeBlob(trackersFile(), { defs, log });
+  return { defs, log };
+}
+
 // --- Travel log (trips + countries) ---
 // Shape: {
 //   countries: { [alpha2]: "visited"|"wishlist" },   // manual map toggles
@@ -520,6 +589,8 @@ function exportData() {
     activities: getActivities(),
     goals: getGoals(),
     travel: getTravel(),
+    tasks: getTasks(),
+    trackers: getTrackers(),
     entries,
     images,
   };
@@ -566,6 +637,26 @@ function importData(obj) {
     const trips = [...(cur.trips || [])];
     for (const tr of obj.travel.trips || []) if (tr && !tripIds.has(tr.id)) trips.push(tr);
     setTravel({ countries, cities, trips });
+  }
+
+  // Merge tasks by id; merge trackers (defs by id, log by date+id).
+  if (Array.isArray(obj.tasks)) {
+    const cur = getTasks();
+    const ids = new Set(cur.map((t) => t.id));
+    const merged = [...cur];
+    for (const t of obj.tasks) if (t && !ids.has(t.id)) merged.push(t);
+    setTasks(merged);
+  }
+  if (obj.trackers) {
+    const cur = getTrackers();
+    const defIds = new Set(cur.defs.map((d) => d.id));
+    const defs = [...cur.defs];
+    for (const d of obj.trackers.defs || []) if (d && !defIds.has(d.id)) defs.push(d);
+    const log = { ...cur.log };
+    for (const [date, vals] of Object.entries(obj.trackers.log || {})) {
+      log[date] = { ...(log[date] || {}), ...vals };
+    }
+    setTrackers({ defs, log });
   }
 
   // Upsert entries (keep their ids so re-importing is idempotent).
@@ -650,6 +741,10 @@ module.exports = {
   setGoals,
   getTravel,
   setTravel,
+  getTasks,
+  setTasks,
+  getTrackers,
+  setTrackers,
   exportData,
   importData,
   readSettings,

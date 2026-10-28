@@ -21,7 +21,7 @@ function currentStreak(byDate) {
   return streak;
 }
 
-export default function StatsView({ entries, entriesByDate, activities }) {
+export default function StatsView({ entries, entriesByDate, activities, trackers }) {
   const actMap = activityMap(activities);
   const filled = entries.filter(isFilled);
 
@@ -102,6 +102,19 @@ export default function StatsView({ entries, entriesByDate, activities }) {
   const topPeople = freq((e) => e.people);
   const maxTag = Math.max(1, ...topTags.map((x) => x.n));
   const maxPerson = Math.max(1, ...topPeople.map((x) => x.n));
+
+  // Trackers: last 30 days per tracker.
+  const trackerDefs = trackers?.defs || [];
+  const tLog = trackers?.log || {};
+  const last30 = [];
+  for (let i = 29; i >= 0; i--) last30.push(addDays(todayKey(), -i));
+  const trackerSeries = trackerDefs.map((d) => {
+    const values = last30.map((key) => (tLog[key] && tLog[key][d.id]) || 0);
+    const total = values.reduce((s, v) => s + v, 0);
+    const max = Math.max(d.target || 1, ...values, 1);
+    const days = values.filter((v) => v > 0).length;
+    return { def: d, values, total, max, days };
+  }).filter((s) => s.total > 0);
 
   return (
     <div className="view">
@@ -203,6 +216,28 @@ export default function StatsView({ entries, entriesByDate, activities }) {
               <span className="cnt">{n}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {trackerSeries.length > 0 && (
+        <div className="card panel">
+          <h3>{t("stats.trackers")}</h3>
+          {trackerSeries.map(({ def, values, max, days }) => (
+            <div className="trk-stat" key={def.id}>
+              <div className="trk-stat-head">
+                <span className="trk-stat-name">{def.emoji} {def.name}</span>
+                <span className="trk-stat-sub">{t("stats.trackerDays", { n: days })}</span>
+              </div>
+              <div className="trk-spark">
+                {values.map((v, i) => (
+                  <div key={i} className="trk-spark-bar"
+                    style={{ height: `${v ? 15 + (v / max) * 85 : 4}%`, background: v ? "var(--accent)" : "var(--surface-2)" }}
+                    title={`${v}`} />
+                ))}
+              </div>
+            </div>
+          ))}
+          <div className="trend-axis"><span>{t("stats.trendStart")}</span><span>{t("stats.trendEnd")}</span></div>
         </div>
       )}
 

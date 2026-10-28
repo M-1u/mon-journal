@@ -186,6 +186,25 @@ core.lockJournal();
 ok("re-unlock after trips", !!core.unlockJournal(j2reg.id, "pw12345"));
 ok("trip + link intact after lock", core.getTravel().trips[0].name === "Japon 2026" && core.listEntries().find((e) => e.id === le.id).tripId === tripId);
 
+// 16. Tasks & trackers persist + normalize
+core.setTasks([{ text: "Acheter du pain", done: false }, { text: "", done: true }]);
+const tks = core.getTasks();
+ok("task saved + empty dropped", tks.length === 1 && tks[0].text === "Acheter du pain" && tks[0].id);
+core.setTrackers({
+  defs: [{ name: "Eau", type: "count", target: 8, emoji: "💧" }, { name: "Sport", type: "bogus" }, { name: "" }],
+  log: { "2026-09-01": { willBeOrphan: 3 } },
+});
+const trk = core.getTrackers();
+ok("tracker defs normalized (bad type → check, empty dropped)", trk.defs.length === 2 && trk.defs[0].type === "count" && trk.defs[1].type === "check");
+const waterId = trk.defs[0].id;
+core.setTrackers({ defs: trk.defs, log: { "2026-09-01": { [waterId]: 6 } } });
+ok("tracker log saved", core.getTrackers().log["2026-09-01"][waterId] === 6);
+core.lockJournal();
+ok("re-unlock after tasks/trackers", !!core.unlockJournal(j2reg.id, "pw12345"));
+ok("tasks/trackers intact after lock", core.getTasks()[0].text === "Acheter du pain" && core.getTrackers().defs.length === 2);
+const exp5 = core.exportData();
+ok("export carries tasks/trackers", JSON.stringify(exp5.tasks).includes("pain") && exp5.trackers.defs.length === 2);
+
 console.log(`\n${pass} checks passed.`);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log("(temp dir cleaned)");

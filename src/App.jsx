@@ -48,18 +48,22 @@ export default function App() {
   const [travel, setTravel] = useState({ countries: {}, cities: [], trips: [] });
   const travelRef = useRef(travel);
   travelRef.current = travel;
+  const [tasks, setTasks] = useState([]);
+  const [trackers, setTrackers] = useState({ defs: [], log: {} });
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [storageRoot, setStorageRoot] = useState("");
   const [newEntrySignal, setNewEntrySignal] = useState(0);
   const [updateReady, setUpdateReady] = useState(false);
 
   const enterJournal = useCallback(async (journal) => {
-    const [s, list, acts, gls, trv, root] = await Promise.all([
+    const [s, list, acts, gls, trv, tsk, trk, root] = await Promise.all([
       storage.getSettings(),
       storage.listEntries(),
       storage.getActivities(),
       storage.getGoals(),
       storage.getTravel(),
+      storage.getTasks(),
+      storage.getTrackers(),
       storage.getStorageRoot(),
     ]);
     setSettings({ ...DEFAULT_SETTINGS, ...s });
@@ -67,6 +71,8 @@ export default function App() {
     setActivities(acts);
     setGoals(gls);
     setTravel(trv || { countries: {}, cities: [], trips: [] });
+    setTasks(tsk || []);
+    setTrackers(trk || { defs: [], log: {} });
     setStorageRoot(root);
     setJournalName(journal.name);
     setView("today");
@@ -163,6 +169,8 @@ export default function App() {
     setActivities([]);
     setGoals([]);
     setTravel({ countries: {}, cities: [], trips: [] });
+    setTasks([]);
+    setTrackers({ defs: [], log: {} });
     setSettings(DEFAULT_SETTINGS);
     setJournalName("");
     setJournals(await storage.listJournals());
@@ -251,6 +259,17 @@ export default function App() {
     applyTravel({ ...travelRef.current, trips: (travelRef.current.trips || []).filter((t) => t.id !== id) });
   }, [applyTravel]);
 
+  const handleTasksChange = useCallback(async (list) => {
+    setTasks(list);
+    const saved = await storage.setTasks(list);
+    setTasks(saved);
+  }, []);
+  const handleTrackersChange = useCallback(async (obj) => {
+    setTrackers(obj);
+    const saved = await storage.setTrackers(obj);
+    setTrackers(saved);
+  }, []);
+
   const changeLang = useCallback((l) => {
     setLang(l);
     document.documentElement.lang = l;
@@ -264,16 +283,20 @@ export default function App() {
   }, []);
 
   const handleImported = useCallback(async () => {
-    const [list, acts, gls, trv] = await Promise.all([
+    const [list, acts, gls, trv, tsk, trk] = await Promise.all([
       storage.listEntries(),
       storage.getActivities(),
       storage.getGoals(),
       storage.getTravel(),
+      storage.getTasks(),
+      storage.getTrackers(),
     ]);
     setEntries(list);
     setActivities(acts);
     setGoals(gls);
     setTravel(trv || { countries: {}, cities: [], trips: [] });
+    setTasks(tsk || []);
+    setTrackers(trk || { defs: [], log: {} });
   }, []);
 
   // Auto-lock after a period of inactivity (per-journal setting, minutes).
@@ -372,10 +395,14 @@ export default function App() {
             tagSuggestions={tagSuggestions}
             peopleSuggestions={peopleSuggestions}
             trips={travel.trips || []}
+            tasks={tasks}
+            trackers={trackers}
             onDateChange={setDate}
             onSaveEntry={handleSaveEntry}
             onDeleteEntry={handleDeleteEntry}
             onToggleFavorite={handleToggleFavorite}
+            onTasksChange={handleTasksChange}
+            onTrackersChange={handleTrackersChange}
           />
         )}
         {view === "calendar" && (
@@ -405,7 +432,7 @@ export default function App() {
           <SearchView entries={entries} activities={activities} onOpenDay={openDay} />
         )}
         {view === "stats" && (
-          <StatsView entries={entries} entriesByDate={entriesByDate} activities={activities} />
+          <StatsView entries={entries} entriesByDate={entriesByDate} activities={activities} trackers={trackers} />
         )}
         {view === "gallery" && <GalleryView entries={entries} onOpenDay={openDay} />}
         {view === "settings" && (
@@ -421,6 +448,8 @@ export default function App() {
             onLangChange={changeLang}
             onImported={handleImported}
             onMoveJournal={handleMoveJournal}
+            trackers={trackers}
+            onTrackersChange={handleTrackersChange}
           />
         )}
       </main>

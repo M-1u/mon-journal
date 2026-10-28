@@ -3,6 +3,7 @@ import { storage, isElectron } from "../lib/storage.js";
 import { IconFolder } from "./Icons.jsx";
 import ChangePasswordCard from "./ChangePasswordCard.jsx";
 import ActivitiesManager from "./ActivitiesManager.jsx";
+import TrackersManager from "./TrackersManager.jsx";
 import BackupCard from "./BackupCard.jsx";
 import { t, LANGS } from "../lib/i18n.js";
 
@@ -20,6 +21,8 @@ export default function SettingsView({
   onLangChange,
   onImported,
   onMoveJournal,
+  trackers,
+  onTrackersChange,
 }) {
   const [moveMsg, setMoveMsg] = useState("");
   const [pdfMsg, setPdfMsg] = useState("");
@@ -216,6 +219,8 @@ export default function SettingsView({
       )}
 
       <ActivitiesManager activities={activities} onChange={onActivitiesChange} />
+
+      <TrackersManager trackers={trackers} onChange={onTrackersChange} />
 
       <BackupCard onImported={onImported} />
 
