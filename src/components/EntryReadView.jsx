@@ -116,6 +116,14 @@ export default function EntryReadView({ entry, activities, goals, trip, onEdit, 
         </div>
       ) : null}
 
+      {entry.audio?.length ? (
+        <div className="er-audio">
+          {entry.audio.map((a) => (
+            <audio key={a.name} controls preload="metadata" src={storage.imageUrl(a.name)} />
+          ))}
+        </div>
+      ) : null}
+
       {imgs.length ? (
         <div className="er-photos">
           {imgs.map((im, i) => (

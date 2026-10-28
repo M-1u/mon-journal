@@ -53,6 +53,7 @@ function EntryCard({ entry, actMap, trip, onClick }) {
           </div>
         ) : null}
         {entry.text?.trim() ? <div className="de-note">{excerpt(entry.text)}</div> : null}
+        {entry.audio?.length ? <div className="de-audio">🎙️ {t("day.voiceNote", { n: entry.audio.length })}</div> : null}
         {(entry.tags?.length || entry.people?.length) ? (
           <div className="de-labels">
             {(entry.tags || []).map((tg) => <span className="lbl-tag" key={"t" + tg}>#{tg}</span>)}

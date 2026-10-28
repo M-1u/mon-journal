@@ -41,6 +41,13 @@ const MIME = {
   ".webp": "image/webp",
   ".bmp": "image/bmp",
   ".svg": "image/svg+xml",
+  ".webm": "audio/webm",
+  ".ogg": "audio/ogg",
+  ".oga": "audio/ogg",
+  ".mp3": "audio/mpeg",
+  ".m4a": "audio/mp4",
+  ".mp4": "audio/mp4",
+  ".wav": "audio/wav",
 };
 
 // ---------------------------------------------------------------------------
@@ -71,6 +78,15 @@ function createWindow() {
   else mainWindow.loadFile(path.join(__dirname, "..", "dist", "index.html"));
 
   applySpellcheck();
+
+  // Allow microphone access for voice notes (local, trusted app).
+  const ses = mainWindow.webContents.session;
+  ses.setPermissionRequestHandler((_wc, permission, cb) => {
+    cb(permission === "media" || permission === "audioCapture" || permission === "mediaKeySystem");
+  });
+  ses.setPermissionCheckHandler((_wc, permission) => {
+    return permission === "media" || permission === "audioCapture";
+  });
 
   // Tell the renderer when we lose/gain focus (privacy blur) — and, if the
   // journal asks for it, auto-lock is driven from the renderer's activity timer.

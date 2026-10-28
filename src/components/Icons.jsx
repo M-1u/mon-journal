@@ -136,6 +136,17 @@ export const IconGlobe = (p) => (
     <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" />
   </svg>
 );
+export const IconMic = (p) => (
+  <svg {...base} {...p}>
+    <rect x="9" y="3" width="6" height="11" rx="3" />
+    <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+  </svg>
+);
+export const IconStop = (p) => (
+  <svg {...base} {...p}>
+    <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none" />
+  </svg>
+);
 export const IconTarget = (p) => (
   <svg {...base} {...p}>
     <circle cx="12" cy="12" r="9" />

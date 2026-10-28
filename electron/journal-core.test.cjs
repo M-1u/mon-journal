@@ -205,6 +205,21 @@ ok("tasks/trackers intact after lock", core.getTasks()[0].text === "Acheter du p
 const exp5 = core.exportData();
 ok("export carries tasks/trackers", JSON.stringify(exp5.tasks).includes("pain") && exp5.trackers.defs.length === 2);
 
+// 17. Voice notes: audio field persists + round-trips via export/import
+const buf = Buffer.from("fake-audio-bytes");
+const audioName = core.storeImageBuffer(buf, ".webm");
+const ve = core.upsertEntry({ date: "2026-10-01", time: "08:00", text: "Mémo", audio: [{ name: audioName, duration: 12 }, { name: "" }] });
+ok("audio normalized (empty dropped, duration kept)", ve.audio.length === 1 && ve.audio[0].name === audioName && ve.audio[0].duration === 12);
+core.lockJournal();
+ok("re-unlock after audio", !!core.unlockJournal(j2reg.id, "pw12345"));
+ok("audio intact after lock", core.listEntries().find((e) => e.id === ve.id).audio[0].duration === 12);
+const exp6 = core.exportData();
+ok("export includes audio file bytes", !!exp6.images[audioName]);
+const j3 = core.createJournal("Backup2", "pw3");
+core.importData(exp6);
+const imported = core.listEntries().find((e) => (e.audio || []).length);
+ok("audio round-trips through import", !!imported && !!core.readImageBuffer(imported.audio[0].name));
+
 console.log(`\n${pass} checks passed.`);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log("(temp dir cleaned)");

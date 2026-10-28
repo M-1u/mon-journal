@@ -9,6 +9,7 @@ import MarkdownEditor from "./MarkdownEditor.jsx";
 import PhotoStrip from "./PhotoStrip.jsx";
 import ActivityPicker from "./ActivityPicker.jsx";
 import ChipInput from "./ChipInput.jsx";
+import VoiceRecorder from "./VoiceRecorder.jsx";
 import { IconChevronLeft, IconCheck, IconTrash, IconClose, IconStar, IconMapPin } from "./Icons.jsx";
 
 function nowTime() {
@@ -32,6 +33,7 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
   const [goalIds, setGoalIds] = useState(entry?.goals || []);
   const [text, setText] = useState(entry?.text || "");
   const [images, setImages] = useState(normImages(entry?.images));
+  const [audio, setAudio] = useState(entry?.audio || []);
   const [place, setPlace] = useState(entry?.place || "");
   const [weather, setWeather] = useState(entry?.weather || null);
   const [favorite, setFavorite] = useState(!!entry?.favorite);
@@ -82,12 +84,12 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
   }
 
   function save() {
-    onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images, place: place.trim(), weather, favorite, tags, people, tripId: tripId || null });
+    onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images, audio, place: place.trim(), weather, favorite, tags, people, tripId: tripId || null });
   }
 
   const canSave =
     mood != null || text.trim() || acts.length || images.length || goalIds.length ||
-    place.trim() || weather || tags.length || people.length;
+    place.trim() || weather || tags.length || people.length || audio.length;
 
   return (
     <div
@@ -271,6 +273,9 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
         </select>
       </div>
       <MarkdownEditor value={text} onChange={setText} />
+
+      <p className="section-label" style={{ marginTop: 24 }}>{t("editor.voice")}</p>
+      <VoiceRecorder audio={audio} onChange={setAudio} />
 
       <p className="section-label" style={{ marginTop: 24 }}>{t("editor.photos")}</p>
       <PhotoStrip images={images} onChange={setImages} />

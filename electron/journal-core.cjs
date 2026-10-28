@@ -355,6 +355,9 @@ function upsertEntry(entry) {
     goals: Array.isArray(entry.goals) ? entry.goals : [],
     text: entry.text ?? "",
     images: Array.isArray(entry.images) ? entry.images : [],
+    audio: Array.isArray(entry.audio)
+      ? entry.audio.filter((a) => a && a.name).map((a) => ({ name: String(a.name), duration: typeof a.duration === "number" ? a.duration : 0 }))
+      : [],
     place: typeof entry.place === "string" ? entry.place.trim() : "",
     weather: entry.weather || null,
     favorite: !!entry.favorite,
@@ -572,14 +575,15 @@ function exportData() {
   if (!activeJournal) return null;
   const entries = listEntries();
   const images = {};
-  for (const e of entries) {
-    for (const im of e.images || []) {
-      const name = typeof im === "string" ? im : im.name;
-      if (name && !images[name]) {
-        const buf = readImageBuffer(name);
-        if (buf) images[name] = buf.toString("base64");
-      }
+  const collect = (name) => {
+    if (name && !images[name]) {
+      const buf = readImageBuffer(name);
+      if (buf) images[name] = buf.toString("base64");
     }
+  };
+  for (const e of entries) {
+    for (const im of e.images || []) collect(typeof im === "string" ? im : im.name);
+    for (const a of e.audio || []) collect(a && a.name);
   }
   return {
     format: "mon-journal-export",
@@ -666,7 +670,8 @@ function importData(obj) {
       const name = typeof im === "string" ? im : im.name;
       return { name: nameMap[name] || name, caption: (im && im.caption) || "" };
     });
-    upsertEntry({ ...e, images });
+    const audio = (e.audio || []).map((a) => ({ name: nameMap[a.name] || a.name, duration: a.duration || 0 }));
+    upsertEntry({ ...e, images, audio });
     count++;
   }
   return { ok: true, entries: count };

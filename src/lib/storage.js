@@ -181,6 +181,9 @@ export const storage = {
       goals: Array.isArray(entry.goals) ? entry.goals : [],
       text: entry.text ?? "",
       images: Array.isArray(entry.images) ? entry.images : [],
+      audio: Array.isArray(entry.audio)
+        ? entry.audio.filter((a) => a && a.name).map((a) => ({ name: String(a.name), duration: typeof a.duration === "number" ? a.duration : 0 }))
+        : [],
       place: typeof entry.place === "string" ? entry.place.trim() : "",
       weather: entry.weather || null,
       favorite: !!entry.favorite,
@@ -322,6 +325,19 @@ export const storage = {
     return [];
   },
 
+  // Store a recorded audio Blob; returns its content-addressed filename.
+  async addAudio(blob, ext = ".webm") {
+    const buf = await blob.arrayBuffer();
+    if (isElectron) {
+      return api.importImageFromData("voice" + ext, arrayBufferToBase64(buf));
+    }
+    const filename = (await sha(buf)) + ext;
+    const images = lsRead(jkey("images"), {});
+    images[filename] = await blobToDataURL(blob);
+    lsWrite(jkey("images"), images);
+    return filename;
+  },
+
   imageUrl(filename) {
     if (isElectron) return api.imageUrl(filename);
     const images = lsRead(jkey("images"), {});
@@ -438,6 +454,7 @@ function fbApplyImport(obj) {
       goals: e.goals || [],
       text: e.text || "",
       images: (e.images || []).map((im) => (typeof im === "string" ? { name: im, caption: "" } : im)),
+      audio: Array.isArray(e.audio) ? e.audio.filter((a) => a && a.name).map((a) => ({ name: a.name, duration: a.duration || 0 })) : [],
       place: typeof e.place === "string" ? e.place : "",
       weather: e.weather || null,
       favorite: !!e.favorite,
