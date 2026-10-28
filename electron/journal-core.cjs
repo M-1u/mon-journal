@@ -346,9 +346,12 @@ function upsertEntry(entry) {
   const day = readDay(date).entries;
   const id = entry.id || crypto.randomUUID();
   const i = day.findIndex((e) => e.id === id);
+  // A multi-day entry spans date..endDate (endDate must be a later day).
+  const endDate = DATE_RE.test(entry.endDate || "") && entry.endDate > date ? entry.endDate : null;
   const full = {
     id,
     date,
+    endDate,
     time: entry.time || "12:00",
     mood: entry.mood ?? null,
     activities: Array.isArray(entry.activities) ? entry.activities : [],

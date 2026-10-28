@@ -175,6 +175,7 @@ export const storage = {
     const full = {
       id,
       date,
+      endDate: /^\d{4}-\d{2}-\d{2}$/.test(entry.endDate || "") && entry.endDate > date ? entry.endDate : null,
       time: entry.time || "12:00",
       mood: entry.mood ?? null,
       activities: Array.isArray(entry.activities) ? entry.activities : [],
@@ -448,6 +449,7 @@ function fbApplyImport(obj) {
     const full = {
       id: e.id,
       date: e.date,
+      endDate: /^\d{4}-\d{2}-\d{2}$/.test(e.endDate || "") && e.endDate > e.date ? e.endDate : null,
       time: e.time || "12:00",
       mood: e.mood ?? null,
       activities: e.activities || [],

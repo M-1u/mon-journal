@@ -4,7 +4,7 @@ import { weatherOf } from "../lib/weather.js";
 import { activityMap, activityLabel } from "../lib/activities.js";
 import { normImages } from "../lib/images.js";
 import { storage } from "../lib/storage.js";
-import { formatLong, isToday, isFuture, addDays, todayKey } from "../lib/date.js";
+import { formatLong, formatDayMonth, isToday, isFuture, addDays, todayKey } from "../lib/date.js";
 import { IconChevronLeft, IconChevronRight, IconPlus } from "./Icons.jsx";
 import { t } from "../lib/i18n.js";
 import EntryReadView from "./EntryReadView.jsx";
@@ -29,6 +29,9 @@ function EntryCard({ entry, actMap, trip, onClick }) {
         {mood && <div className="de-mood" style={{ color: mood.color }}>{mood.emoji}</div>}
       </div>
       <div className="de-body">
+        {entry.endDate ? (
+          <div className="de-range">📅 {formatDayMonth(entry.date)} → {formatDayMonth(entry.endDate)}</div>
+        ) : null}
         <span className="de-moodline">
           {mood && <span className="de-moodlabel" style={{ color: mood.color }}>{moodLabel(mood.value)}</span>}
           {entry.weather && <span className="de-weather">{weatherOf(entry.weather)?.emoji}</span>}
@@ -107,7 +110,9 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
     }
   }
   async function handleDelete(entry) {
-    await onDeleteEntry(date, entry.id);
+    // Use the entry's own (start) date — a multi-day entry is stored there,
+    // not necessarily on the day currently being viewed.
+    await onDeleteEntry(entry.date, entry.id);
     setEditing(null);
     setViewing(null);
   }

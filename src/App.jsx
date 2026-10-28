@@ -12,7 +12,7 @@ import LockScreen from "./components/LockScreen.jsx";
 // Travel view bundles the world map + country data; load it on demand.
 const TravelView = lazy(() => import("./components/TravelView.jsx"));
 import { storage } from "./lib/storage.js";
-import { todayKey } from "./lib/date.js";
+import { todayKey, eachDay } from "./lib/date.js";
 import { getLang, setLang, t } from "./lib/i18n.js";
 
 const DEFAULT_SETTINGS = {
@@ -114,10 +114,13 @@ export default function App() {
     document.documentElement.style.setProperty("--accent-ink", inkFor(settings.accent));
   }, [settings.accent]);
 
-  // Group entries by date for the calendar / day view.
+  // Group entries by date for the calendar / day view. A multi-day entry
+  // (with endDate) is listed on every day it spans.
   const entriesByDate = useMemo(() => {
     const map = {};
-    for (const e of entries) (map[e.date] ||= []).push(e);
+    for (const e of entries) {
+      for (const d of e.endDate ? eachDay(e.date, e.endDate) : [e.date]) (map[d] ||= []).push(e);
+    }
     return map;
   }, [entries]);
 
@@ -381,7 +384,11 @@ export default function App() {
           <button className="update-close" onClick={() => setUpdateReady(false)} title={t("common.cancel")}>×</button>
         </div>
       )}
-      <Sidebar view={view} onNavigate={setView} journalName={journalName} />
+      <Sidebar
+        view={view}
+        onNavigate={(v) => { if (v === "today") setDate(todayKey()); setView(v); }}
+        journalName={journalName}
+      />
       <main className="main">
         {view === "today" && (
           <DayView

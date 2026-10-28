@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { moodOf, moodLabel } from "../lib/moods.js";
 import { weatherOf, weatherLabel } from "../lib/weather.js";
+import { formatDayMonth } from "../lib/date.js";
 import { activityMap, activityLabel } from "../lib/activities.js";
 import { goalMap, TERM_BY_ID } from "../lib/goals.js";
 import { normImages } from "../lib/images.js";
@@ -64,6 +65,10 @@ export default function EntryReadView({ entry, activities, goals, trip, onEdit, 
           <span>{moodLabel(mood.value)}</span>
         </div>
       )}
+
+      {entry.endDate ? (
+        <div className="er-range">📅 {formatDayMonth(entry.date)} → {formatDayMonth(entry.endDate)}</div>
+      ) : null}
 
       {trip ? <div className="er-trip">🧳 {trip.name}</div> : null}
 

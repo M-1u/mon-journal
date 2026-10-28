@@ -220,6 +220,18 @@ core.importData(exp6);
 const imported = core.listEntries().find((e) => (e.audio || []).length);
 ok("audio round-trips through import", !!imported && !!core.readImageBuffer(imported.audio[0].name));
 
+// 18. Multi-day entries: endDate kept only when later than start (active journal)
+const mdJournal = core.createJournal("Multi", "pw-multi"); // becomes active
+const md = core.upsertEntry({ date: "2026-11-01", endDate: "2026-11-03", time: "10:00", text: "Week-end prolongé" });
+ok("endDate kept when later", md.endDate === "2026-11-03");
+const bad = core.upsertEntry({ date: "2026-11-10", endDate: "2026-11-08", time: "10:00", text: "mauvaise plage" });
+ok("endDate dropped when not later", bad.endDate === null);
+const same = core.upsertEntry({ date: "2026-11-15", endDate: "2026-11-15", time: "10:00", text: "même jour" });
+ok("endDate dropped when equal to start", same.endDate === null);
+core.lockJournal();
+ok("re-unlock after multi-day", !!core.unlockJournal(mdJournal.id, "pw-multi"));
+ok("multi-day intact after lock", core.listEntries().find((e) => e.id === md.id).endDate === "2026-11-03");
+
 console.log(`\n${pass} checks passed.`);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log("(temp dir cleaned)");

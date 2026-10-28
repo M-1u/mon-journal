@@ -3,6 +3,7 @@ import { MOODS, moodLabel } from "../lib/moods.js";
 import { normImages } from "../lib/images.js";
 import { goalMap, TERM_BY_ID } from "../lib/goals.js";
 import { WEATHERS, weatherLabel } from "../lib/weather.js";
+import { addDays, formatDayMonth } from "../lib/date.js";
 import { storage } from "../lib/storage.js";
 import { t } from "../lib/i18n.js";
 import MarkdownEditor from "./MarkdownEditor.jsx";
@@ -40,6 +41,8 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
   const [tags, setTags] = useState(entry?.tags || []);
   const [people, setPeople] = useState(entry?.people || []);
   const [tripId, setTripId] = useState(entry?.tripId || "");
+  const [endDate, setEndDate] = useState(entry?.endDate || "");
+  const [multiDay, setMultiDay] = useState(!!entry?.endDate);
   const [dragOver, setDragOver] = useState(false);
 
   async function addImageFiles(fileList) {
@@ -84,7 +87,7 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
   }
 
   function save() {
-    onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images, audio, place: place.trim(), weather, favorite, tags, people, tripId: tripId || null });
+    onSave({ id: entry?.id, date, endDate: multiDay && endDate > date ? endDate : null, time, mood, activities: acts, goals: goalIds, text, images, audio, place: place.trim(), weather, favorite, tags, people, tripId: tripId || null });
   }
 
   const canSave =
@@ -120,6 +123,25 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
           onChange={(e) => setTime(e.target.value)}
           title={t("editor.time")}
         />
+      </div>
+
+      <div className="ee-multiday">
+        <label className="ee-multiday-toggle">
+          <button
+            type="button"
+            className={"switch" + (multiDay ? " on" : "")}
+            onClick={() => { setMultiDay((v) => !v); if (!multiDay && !endDate) setEndDate(addDays(date, 1)); }}
+            aria-pressed={multiDay}
+            aria-label={t("editor.multiDay")}
+          />
+          <span>{t("editor.multiDay")}</span>
+        </label>
+        {multiDay && (
+          <span className="ee-range-dates">
+            {formatDayMonth(date)} →
+            <input type="date" min={addDays(date, 1)} value={endDate} onChange={(e) => setEndDate(e.target.value)} aria-label={t("editor.endDate")} />
+          </span>
+        )}
       </div>
 
       <p className="section-label">{t("editor.mood")}</p>

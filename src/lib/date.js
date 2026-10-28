@@ -46,6 +46,22 @@ export function formatMonthYear(year, month) {
 export function monthShort(monthIndex) {
   return fmt("monthShort", { month: "short" }).format(new Date(2020, monthIndex, 1));
 }
+// "28 oct." — compact day + short month, for date ranges.
+export function formatDayMonth(key) {
+  return fmt("dayMonth", { day: "numeric", month: "short" }).format(fromKey(key));
+}
+// Inclusive list of "YYYY-MM-DD" keys from `from` to `to` (guarded at 370 days).
+export function eachDay(from, to) {
+  if (!to || to <= from) return [from];
+  const out = [];
+  let d = from;
+  let guard = 0;
+  while (d <= to && guard++ < 370) {
+    out.push(d);
+    d = addDays(d, 1);
+  }
+  return out;
+}
 
 export function isToday(key) {
   return key === todayKey();
