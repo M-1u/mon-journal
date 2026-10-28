@@ -164,6 +164,9 @@ export const storage = {
       goals: Array.isArray(entry.goals) ? entry.goals : [],
       text: entry.text ?? "",
       images: Array.isArray(entry.images) ? entry.images : [],
+      place: typeof entry.place === "string" ? entry.place.trim() : "",
+      weather: entry.weather || null,
+      favorite: !!entry.favorite,
       createdAt: i >= 0 ? list[i].createdAt : now,
       updatedAt: now,
     };
@@ -367,6 +370,9 @@ function fbApplyImport(obj) {
       goals: e.goals || [],
       text: e.text || "",
       images: (e.images || []).map((im) => (typeof im === "string" ? { name: im, caption: "" } : im)),
+      place: typeof e.place === "string" ? e.place : "",
+      weather: e.weather || null,
+      favorite: !!e.favorite,
       createdAt: e.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

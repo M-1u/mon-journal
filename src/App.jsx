@@ -110,6 +110,20 @@ export default function App() {
 
   const dayEntries = entriesByDate[date] || [];
 
+  // Distinct places already used, most recent first, for autocomplete.
+  const placeSuggestions = useMemo(() => {
+    const seen = new Set();
+    const out = [];
+    for (const e of entries) {
+      const p = (e.place || "").trim();
+      if (p && !seen.has(p.toLowerCase())) {
+        seen.add(p.toLowerCase());
+        out.push(p);
+      }
+    }
+    return out.slice(0, 50);
+  }, [entries]);
+
   // --- Auth handlers ---
   const handleUnlock = useCallback(
     async (id, password) => {
@@ -151,6 +165,13 @@ export default function App() {
   const handleDeleteEntry = useCallback(async (d, id) => {
     await storage.deleteEntry(d, id);
     setEntries((prev) => prev.filter((e) => e.id !== id));
+  }, []);
+
+  const handleToggleFavorite = useCallback(async (entry) => {
+    const updated = { ...entry, favorite: !entry.favorite };
+    const saved = await storage.upsertEntry(updated);
+    setEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...saved } : e)));
+    return saved;
   }, []);
 
   const openDay = useCallback((d) => {
@@ -288,9 +309,11 @@ export default function App() {
             activities={activities}
             goals={goals}
             newEntrySignal={newEntrySignal}
+            placeSuggestions={placeSuggestions}
             onDateChange={setDate}
             onSaveEntry={handleSaveEntry}
             onDeleteEntry={handleDeleteEntry}
+            onToggleFavorite={handleToggleFavorite}
           />
         )}
         {view === "calendar" && (

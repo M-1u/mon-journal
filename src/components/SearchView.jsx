@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { MOODS, moodOf, moodLabel } from "../lib/moods.js";
+import { weatherOf } from "../lib/weather.js";
 import { activityMap, activityLabel } from "../lib/activities.js";
 import { fromKey, monthShort } from "../lib/date.js";
 import { normImages } from "../lib/images.js";
@@ -15,6 +16,7 @@ export default function SearchView({ entries, activities, onOpenDay }) {
   const [q, setQ] = useState("");
   const [moods, setMoods] = useState(() => new Set());
   const [acts, setActs] = useState(() => new Set());
+  const [favOnly, setFavOnly] = useState(false);
   const actMap = activityMap(activities);
 
   const toggle = (set, val, setter) => {
@@ -22,20 +24,24 @@ export default function SearchView({ entries, activities, onOpenDay }) {
     next.has(val) ? next.delete(val) : next.add(val);
     setter(next);
   };
-  const active = q.trim() || moods.size || acts.size;
+  const active = q.trim() || moods.size || acts.size || favOnly;
 
   const results = useMemo(() => {
     if (!active) return [];
     const needle = q.trim().toLowerCase();
     return entries
       .filter((e) => {
-        if (needle && !plain(e.text).toLowerCase().includes(needle)) return false;
+        if (needle) {
+          const hay = (plain(e.text) + " " + (e.place || "")).toLowerCase();
+          if (!hay.includes(needle)) return false;
+        }
         if (moods.size && !moods.has(e.mood)) return false;
         if (acts.size && !(e.activities || []).some((id) => acts.has(id))) return false;
+        if (favOnly && !e.favorite) return false;
         return true;
       })
       .sort((a, b) => (a.date === b.date ? (a.time < b.time ? 1 : -1) : a.date < b.date ? 1 : -1));
-  }, [entries, q, moods, acts, active]);
+  }, [entries, q, moods, acts, favOnly, active]);
 
   return (
     <div className="view">
@@ -86,8 +92,18 @@ export default function SearchView({ entries, activities, onOpenDay }) {
             ))}
           </div>
         )}
+        <div className="sf-group">
+          <button
+            className={"sf-chip" + (favOnly ? " on" : "")}
+            style={favOnly ? { borderColor: "#f0b429", color: "#f0b429" } : null}
+            onClick={() => setFavOnly((v) => !v)}
+            aria-pressed={favOnly}
+          >
+            ★ {t("search.favorites")}
+          </button>
+        </div>
         {active ? (
-          <button className="sf-reset" onClick={() => { setQ(""); setMoods(new Set()); setActs(new Set()); }}>
+          <button className="sf-reset" onClick={() => { setQ(""); setMoods(new Set()); setActs(new Set()); setFavOnly(false); }}>
             {t("search.clear")}
           </button>
         ) : null}
@@ -120,7 +136,10 @@ export default function SearchView({ entries, activities, onOpenDay }) {
                           <span className="mlabel" style={{ color: mood.color }}>{moodLabel(mood.value)}</span>
                         </>
                       ) : null}
+                      {e.weather ? <span className="tl-weather">{weatherOf(e.weather)?.emoji}</span> : null}
+                      {e.favorite ? <span className="tl-fav">★</span> : null}
                     </div>
+                    {e.place ? <div className="tl-place">📍 {e.place}</div> : null}
                     {e.activities?.length ? (
                       <div className="tl-acts">
                         {e.activities.map((id) => actMap[id] ? (

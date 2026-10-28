@@ -221,7 +221,9 @@ function buildJournalHtml() {
   for (const a of core.getActivities() || []) acts[a.id] = a;
   const goals = {};
   for (const g of core.getGoals() || []) goals[g.id] = g;
-  const MOODS = ["😔", "😕", "😐", "🙂", "😄"]; // value 0..4
+  // Mood scale is 1 (worst) .. 5 (best), matching src/lib/moods.js.
+  const MOODS = { 1: "😢", 2: "🙁", 3: "😐", 4: "🙂", 5: "😄" };
+  const WEATHER = { sunny: "☀️", partly: "🌤️", cloudy: "☁️", rainy: "🌧️", stormy: "⛈️", snowy: "❄️", foggy: "🌫️", windy: "💨" };
   const byDate = {};
   for (const e of entries) (byDate[e.date] ||= []).push(e);
   const dates = Object.keys(byDate).sort().reverse();
@@ -232,12 +234,16 @@ function buildJournalHtml() {
     body += `<h2>${esc(d)}</h2>`;
     for (const e of byDate[d].sort((a, b) => (a.time < b.time ? 1 : -1))) {
       const mood = e.mood != null ? MOODS[e.mood] || "" : "";
+      const weather = e.weather ? WEATHER[e.weather] || "" : "";
+      const fav = e.favorite ? "★ " : "";
+      const ctx = [weather, e.place ? "📍 " + esc(e.place) : ""].filter(Boolean).join(" · ");
       const tags = (e.activities || []).map((id) => acts[id]).filter(Boolean)
         .map((a) => `${a.emoji} ${esc(a.name)}`).join(" · ");
       const gs = (e.goals || []).map((id) => goals[id]).filter(Boolean)
         .map((g) => `🎯 ${esc(g.text)}`).join(" · ");
       const text = esc(e.text || "").replace(/\n/g, "<br>");
-      body += `<div class="entry"><div class="meta">${esc(e.time || "")} ${mood}</div>` +
+      body += `<div class="entry"><div class="meta">${fav}${esc(e.time || "")} ${mood}</div>` +
+        (ctx ? `<div class="tags">${ctx}</div>` : "") +
         (tags ? `<div class="tags">${tags}</div>` : "") +
         (gs ? `<div class="tags">${gs}</div>` : "") +
         (text ? `<div class="text">${text}</div>` : "") +

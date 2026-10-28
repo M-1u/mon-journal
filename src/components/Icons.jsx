@@ -119,6 +119,17 @@ export const IconSearch = (p) => (
     <path d="M21 21l-4.3-4.3" />
   </svg>
 );
+export const IconStar = ({ filled, ...p }) => (
+  <svg {...base} fill={filled ? "currentColor" : "none"} {...p}>
+    <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8L3.5 9.7l5.9-.9z" />
+  </svg>
+);
+export const IconMapPin = (p) => (
+  <svg {...base} {...p}>
+    <path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z" />
+    <circle cx="12" cy="11" r="2.2" />
+  </svg>
+);
 export const IconTarget = (p) => (
   <svg {...base} {...p}>
     <circle cx="12" cy="12" r="9" />

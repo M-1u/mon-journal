@@ -153,6 +153,14 @@ export default function MarkdownEditor({ value, onChange, placeholder }) {
       )}
 
       <EditorContent editor={editor} className="md-content" />
+
+      <div className="md-count" aria-live="polite">
+        {(() => {
+          const txt = editor.getText().trim();
+          const words = txt ? txt.split(/\s+/).length : 0;
+          return t("md.words", { n: words });
+        })()}
+      </div>
     </div>
   );
 }

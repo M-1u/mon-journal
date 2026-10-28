@@ -1995,3 +1995,65 @@ body.privacy-blur .main::after {
 .entry-editor.drag-over {
   outline: 2px dashed var(--accent); outline-offset: 6px; border-radius: 12px;
 }
+
+/* ── Improvements pass: word count, inline errors, reduced motion ──────── */
+.md-count {
+  text-align: right; font-size: 12px; color: var(--ink-faint);
+  padding: 4px 2px 0; user-select: none;
+}
+.inline-error {
+  background: color-mix(in srgb, var(--danger, #e5544b) 14%, transparent);
+  color: var(--danger, #e5544b); border: 1px solid var(--danger, #e5544b);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-weight: 600; font-size: 14px;
+}
+.editor-loading {
+  padding: 40px; text-align: center; color: var(--ink-faint); font-size: 14px;
+}
+
+/* Honour the OS "reduce motion" preference. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── New features: favorite, place, weather ───────────────────────────── */
+.fav-btn {
+  background: transparent; border: none; cursor: pointer; padding: 6px;
+  color: var(--ink-faint); border-radius: 8px; display: grid; place-items: center;
+}
+.fav-btn:hover { background: var(--surface-hover); color: #f0b429; }
+.fav-btn.on { color: #f0b429; }
+
+.context-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 4px; }
+.place-field {
+  display: flex; align-items: center; gap: 8px; flex: 1 1 220px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 0 12px; color: var(--ink-faint);
+}
+.place-input {
+  flex: 1; border: none; background: transparent; color: var(--ink);
+  padding: 10px 0; font-size: 14px; outline: none;
+}
+.weather-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.weather-btn {
+  width: 38px; height: 38px; border-radius: 10px; font-size: 19px; line-height: 1;
+  border: 1px solid var(--border); background: var(--surface-2); cursor: pointer;
+  filter: grayscale(0.7) opacity(0.65); transition: filter .12s ease, border-color .12s ease;
+}
+.weather-btn:hover { filter: none; }
+.weather-btn.selected { filter: none; border-color: var(--accent); background: var(--surface-hover); }
+
+/* Entry cards / read view / timeline indicators */
+.de-moodline { display: inline-flex; align-items: center; gap: 8px; }
+.de-weather, .tl-weather { font-size: 15px; }
+.de-fav, .er-fav, .tl-fav { color: #f0b429; font-size: 15px; }
+.de-place, .tl-place { color: var(--ink-faint); font-size: 12.5px; margin-top: 3px; }
+.er-context {
+  display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+  margin-top: 14px; color: var(--ink-soft, var(--ink-faint)); font-size: 14px;
+}
+.er-place { color: var(--ink-faint); }

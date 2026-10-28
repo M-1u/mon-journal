@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { moodOf, moodLabel } from "../lib/moods.js";
+import { weatherOf } from "../lib/weather.js";
 import { activityMap, activityLabel } from "../lib/activities.js";
 import { normImages } from "../lib/images.js";
 import { storage } from "../lib/storage.js";
 import { formatLong, isToday, isFuture, addDays, todayKey } from "../lib/date.js";
 import { IconChevronLeft, IconChevronRight, IconPlus } from "./Icons.jsx";
 import { t } from "../lib/i18n.js";
-import EntryEditor from "./EntryEditor.jsx";
 import EntryReadView from "./EntryReadView.jsx";
 import Memories from "./Memories.jsx";
+
+// The editor pulls in the (heavy) rich-text engine; load it only when needed.
+const EntryEditor = lazy(() => import("./EntryEditor.jsx"));
 
 function excerpt(text) {
   return (text || "").replace(/[#*_`>\-[\]]/g, "").replace(/\n+/g, " ").trim();
@@ -24,7 +27,12 @@ function EntryCard({ entry, actMap, onClick }) {
         {mood && <div className="de-mood" style={{ color: mood.color }}>{mood.emoji}</div>}
       </div>
       <div className="de-body">
-        {mood && <span className="de-moodlabel" style={{ color: mood.color }}>{moodLabel(mood.value)}</span>}
+        <span className="de-moodline">
+          {mood && <span className="de-moodlabel" style={{ color: mood.color }}>{moodLabel(mood.value)}</span>}
+          {entry.weather && <span className="de-weather">{weatherOf(entry.weather)?.emoji}</span>}
+          {entry.favorite && <span className="de-fav" aria-label={t("editor.favorite")}>★</span>}
+        </span>
+        {entry.place ? <div className="de-place">📍 {entry.place}</div> : null}
         {entry.activities?.length ? (
           <div className="de-acts">
             {entry.activities.map((id) =>
@@ -54,9 +62,10 @@ function EntryCard({ entry, actMap, onClick }) {
   );
 }
 
-export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, onDateChange, onSaveEntry, onDeleteEntry }) {
+export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, placeSuggestions, onDateChange, onSaveEntry, onDeleteEntry, onToggleFavorite }) {
   const [editing, setEditing] = useState(null); // null | 'new' | entry
   const [viewing, setViewing] = useState(null); // null | entry (read mode)
+  const [saveError, setSaveError] = useState("");
   const actMap = activityMap(activities);
 
   // Leave the editor/reader when navigating to another day.
@@ -74,9 +83,16 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
   }, [newEntrySignal]);
 
   async function handleSave(entry) {
-    await onSaveEntry(entry);
-    setEditing(null);
-    setViewing(null);
+    try {
+      setSaveError("");
+      await onSaveEntry(entry);
+      setEditing(null);
+      setViewing(null);
+    } catch (err) {
+      // Keep the editor open so nothing the user typed is lost.
+      console.error("save entry failed", err);
+      setSaveError(t("editor.saveError"));
+    }
   }
   async function handleDelete(entry) {
     await onDeleteEntry(date, entry.id);
@@ -87,15 +103,19 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
   if (editing) {
     return (
       <div className="view">
-        <EntryEditor
-          date={date}
-          entry={editing === "new" ? null : editing}
-          activities={activities}
-          goals={goals}
-          onSave={handleSave}
-          onDelete={handleDelete}
-          onCancel={() => { setEditing(null); }}
-        />
+        {saveError && <div className="inline-error" role="alert">{saveError}</div>}
+        <Suspense fallback={<div className="editor-loading">{t("common.loading")}</div>}>
+          <EntryEditor
+            date={date}
+            entry={editing === "new" ? null : editing}
+            activities={activities}
+            goals={goals}
+            placeSuggestions={placeSuggestions}
+            onSave={handleSave}
+            onDelete={handleDelete}
+            onCancel={() => { setEditing(null); setSaveError(""); }}
+          />
+        </Suspense>
       </div>
     );
   }
@@ -109,6 +129,7 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
           goals={goals}
           onEdit={(entry) => { setViewing(null); setEditing(entry); }}
           onDelete={handleDelete}
+          onToggleFavorite={onToggleFavorite}
           onBack={() => setViewing(null)}
         />
       </div>
@@ -121,7 +142,7 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
   return (
     <div className="view">
       <div className="day-nav">
-        <button className="icon-btn" onClick={() => onDateChange(addDays(date, -1))} title={t("day.prevDay")}>
+        <button className="icon-btn" onClick={() => onDateChange(addDays(date, -1))} title={t("day.prevDay")} aria-label={t("day.prevDay")}>
           <IconChevronLeft />
         </button>
         <div className="date">
@@ -134,6 +155,7 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
           disabled={isToday(date)}
           style={isToday(date) ? { opacity: 0.35, pointerEvents: "none" } : null}
           title={t("day.nextDay")}
+          aria-label={t("day.nextDay")}
         >
           <IconChevronRight />
         </button>

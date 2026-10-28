@@ -2,12 +2,13 @@ import { useState } from "react";
 import { MOODS, moodLabel } from "../lib/moods.js";
 import { normImages } from "../lib/images.js";
 import { goalMap, TERM_BY_ID } from "../lib/goals.js";
+import { WEATHERS, weatherLabel } from "../lib/weather.js";
 import { storage } from "../lib/storage.js";
 import { t } from "../lib/i18n.js";
 import MarkdownEditor from "./MarkdownEditor.jsx";
 import PhotoStrip from "./PhotoStrip.jsx";
 import ActivityPicker from "./ActivityPicker.jsx";
-import { IconChevronLeft, IconCheck, IconTrash, IconClose } from "./Icons.jsx";
+import { IconChevronLeft, IconCheck, IconTrash, IconClose, IconStar, IconMapPin } from "./Icons.jsx";
 
 function nowTime() {
   const d = new Date();
@@ -22,7 +23,7 @@ const TEMPLATES = [
 ];
 
 // Full form to create or edit one entry.
-export default function EntryEditor({ date, entry, activities, goals, onSave, onDelete, onCancel }) {
+export default function EntryEditor({ date, entry, activities, goals, placeSuggestions, onSave, onDelete, onCancel }) {
   const isNew = !entry;
   const [time, setTime] = useState(entry?.time || nowTime());
   const [mood, setMood] = useState(entry?.mood ?? null);
@@ -30,6 +31,9 @@ export default function EntryEditor({ date, entry, activities, goals, onSave, on
   const [goalIds, setGoalIds] = useState(entry?.goals || []);
   const [text, setText] = useState(entry?.text || "");
   const [images, setImages] = useState(normImages(entry?.images));
+  const [place, setPlace] = useState(entry?.place || "");
+  const [weather, setWeather] = useState(entry?.weather || null);
+  const [favorite, setFavorite] = useState(!!entry?.favorite);
   const [dragOver, setDragOver] = useState(false);
 
   async function addImageFiles(fileList) {
@@ -74,10 +78,11 @@ export default function EntryEditor({ date, entry, activities, goals, onSave, on
   }
 
   function save() {
-    onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images });
+    onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images, place: place.trim(), weather, favorite });
   }
 
-  const canSave = mood != null || text.trim() || acts.length || images.length || goalIds.length;
+  const canSave =
+    mood != null || text.trim() || acts.length || images.length || goalIds.length || place.trim() || weather;
 
   return (
     <div
@@ -92,6 +97,16 @@ export default function EntryEditor({ date, entry, activities, goals, onSave, on
           <IconChevronLeft width={16} height={16} /> {t("common.back")}
         </button>
         <div className="ee-title">{isNew ? t("editor.new") : t("editor.edit")}</div>
+        <button
+          type="button"
+          className={"fav-btn" + (favorite ? " on" : "")}
+          onClick={() => setFavorite((f) => !f)}
+          title={t("editor.favorite")}
+          aria-pressed={favorite}
+          aria-label={t("editor.favorite")}
+        >
+          <IconStar width={18} height={18} filled={favorite} />
+        </button>
         <input
           type="time"
           value={time}
@@ -113,6 +128,42 @@ export default function EntryEditor({ date, entry, activities, goals, onSave, on
             <span className="name">{moodLabel(m.value)}</span>
           </button>
         ))}
+      </div>
+
+      <p className="section-label">{t("editor.context")}</p>
+      <div className="context-row">
+        <div className="place-field">
+          <IconMapPin width={16} height={16} aria-hidden="true" />
+          <input
+            className="place-input"
+            type="text"
+            value={place}
+            onChange={(e) => setPlace(e.target.value)}
+            placeholder={t("editor.placePlaceholder")}
+            aria-label={t("editor.place")}
+            list="place-suggestions"
+          />
+          {placeSuggestions?.length ? (
+            <datalist id="place-suggestions">
+              {placeSuggestions.map((p) => <option key={p} value={p} />)}
+            </datalist>
+          ) : null}
+        </div>
+        <div className="weather-row" role="group" aria-label={t("editor.weather")}>
+          {WEATHERS.map((w) => (
+            <button
+              key={w.id}
+              type="button"
+              className={"weather-btn" + (weather === w.id ? " selected" : "")}
+              onClick={() => setWeather(weather === w.id ? null : w.id)}
+              title={weatherLabel(w.id)}
+              aria-label={weatherLabel(w.id)}
+              aria-pressed={weather === w.id}
+            >
+              {w.emoji}
+            </button>
+          ))}
+        </div>
       </div>
 
       <p className="section-label">{t("editor.activities")}</p>

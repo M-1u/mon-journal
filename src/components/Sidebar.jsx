@@ -29,16 +29,19 @@ export default function Sidebar({ view, onNavigate, journalName }) {
         <span className="logo"><BrandMark size={22} /></span>
         <span>{journalName || t("app.name")}</span>
       </div>
-      {NAV.map(({ id, key, Icon }) => (
-        <button
-          key={id}
-          className={"nav-item" + (view === id ? " active" : "")}
-          onClick={() => onNavigate(id)}
-        >
-          <Icon className="ico" />
-          {t(key)}
-        </button>
-      ))}
+      <nav className="nav" aria-label={t("nav.aria")}>
+        {NAV.map(({ id, key, Icon }) => (
+          <button
+            key={id}
+            className={"nav-item" + (view === id ? " active" : "")}
+            onClick={() => onNavigate(id)}
+            aria-current={view === id ? "page" : undefined}
+          >
+            <Icon className="ico" aria-hidden="true" />
+            {t(key)}
+          </button>
+        ))}
+      </nav>
       <div className="spacer" />
       <div style={{ padding: "8px 10px", fontSize: 11.5, color: "var(--ink-faint)" }}>
         {t("sidebar.footer")}

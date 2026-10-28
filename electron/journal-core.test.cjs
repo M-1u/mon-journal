@@ -123,6 +123,20 @@ core.lockJournal();
 ok("re-unlock from new location works", !!core.unlockJournal(j2reg.id, "pw12345"));
 ok("entries intact from new location", core.listEntries().length >= 1);
 
+// 12. Place / weather / favorite fields persist and round-trip
+const en = core.upsertEntry({
+  date: "2026-08-01", time: "10:00", mood: 4, text: "Balade",
+  place: "Lac d'Annecy", weather: "sunny", favorite: true,
+});
+ok("new fields returned on save", en.place === "Lac d'Annecy" && en.weather === "sunny" && en.favorite === true);
+ok("place trimmed on save", core.upsertEntry({ date: "2026-08-02", time: "11:00", place: "  Paris  " }).place === "Paris");
+core.lockJournal();
+ok("re-unlock after new fields", !!core.unlockJournal(j2reg.id, "pw12345"));
+const got = core.listEntries().find((e) => e.id === en.id);
+ok("place/weather/favorite intact after lock", got.place === "Lac d'Annecy" && got.weather === "sunny" && got.favorite === true);
+const exp2 = core.exportData();
+ok("export carries new fields", JSON.stringify(exp2).includes("Lac d'Annecy") && exp2.entries.some((e) => e.weather === "sunny" && e.favorite === true));
+
 console.log(`\n${pass} checks passed.`);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log("(temp dir cleaned)");

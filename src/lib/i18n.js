@@ -15,9 +15,12 @@ const FR = {
   "common.open": "Ouvrir",
   "common.change": "Changer…",
   "common.today": "Aujourd'hui",
+  "common.close": "Fermer",
+  "common.loading": "Chargement…",
   "sidebar.footer": "Local · privé · hors-ligne",
 
   // Nav
+  "nav.aria": "Navigation principale",
   "nav.today": "Aujourd'hui",
   "nav.calendar": "Calendrier",
   "nav.timeline": "Journal",
@@ -32,6 +35,7 @@ const FR = {
   "search.placeholder": "Rechercher dans tes entrées…",
   "search.moods": "Humeurs",
   "search.activities": "Activités",
+  "search.favorites": "Favoris",
   "search.clear": "Effacer les filtres",
   "search.count": "{n} résultat",
   "search.count_plural": "{n} résultats",
@@ -100,6 +104,22 @@ const FR = {
   "editor.pickGoal": "＋ Valider un objectif…",
   "editor.allGoals": "Tous tes objectifs sont sélectionnés pour cette entrée.",
   "editor.noGoals": "Aucun objectif défini. Ajoute-en dans l'onglet « Objectifs ».",
+  "editor.saveError": "L'enregistrement a échoué. Réessaie.",
+  "editor.favorite": "Favori",
+  "editor.context": "Lieu & météo",
+  "editor.place": "Lieu",
+  "editor.placePlaceholder": "Où étais-tu ? (ex. Maison, Paris…)",
+  "editor.weather": "Météo",
+
+  // Weather
+  "weather.sunny": "Ensoleillé",
+  "weather.partly": "Éclaircies",
+  "weather.cloudy": "Nuageux",
+  "weather.rainy": "Pluvieux",
+  "weather.stormy": "Orageux",
+  "weather.snowy": "Neigeux",
+  "weather.foggy": "Brumeux",
+  "weather.windy": "Venteux",
 
   // Activity picker
   "act.none": "Aucune activité. Ajoute-en dans les Réglages.",
@@ -118,6 +138,8 @@ const FR = {
   "md.placeholder": "Écris ce qui te passe par la tête…",
   "md.linkPlaceholder": "https://exemple.com",
   "md.apply": "Appliquer",
+  "md.words": "{n} mot",
+  "md.words_plural": "{n} mots",
 
   // Photos
   "photo.caption": "Ajouter une description…",
@@ -145,8 +167,11 @@ const FR = {
   "stats.entries": "Entrées",
   "stats.avgMood": "Humeur moyenne",
   "stats.daysLogged": "Jours journalisés",
+  "stats.favorites": "Favoris",
   "stats.moodDist": "Répartition des humeurs",
   "stats.topActs": "Activités les plus fréquentes",
+  "stats.weatherDist": "Répartition de la météo",
+  "stats.topPlaces": "Lieux les plus fréquents",
   "stats.trend": "Tendance · 30 derniers jours",
   "stats.trendStart": "il y a 30 j",
   "stats.trendEnd": "aujourd'hui",
@@ -286,8 +311,11 @@ const EN = {
   "common.open": "Open",
   "common.change": "Change…",
   "common.today": "Today",
+  "common.close": "Close",
+  "common.loading": "Loading…",
   "sidebar.footer": "Local · private · offline",
 
+  "nav.aria": "Main navigation",
   "nav.today": "Today",
   "nav.calendar": "Calendar",
   "nav.timeline": "Journal",
@@ -301,6 +329,7 @@ const EN = {
   "search.placeholder": "Search your entries…",
   "search.moods": "Moods",
   "search.activities": "Activities",
+  "search.favorites": "Favorites",
   "search.clear": "Clear filters",
   "search.count": "{n} result",
   "search.count_plural": "{n} results",
@@ -363,6 +392,22 @@ const EN = {
   "editor.pickGoal": "＋ Mark a goal as reached…",
   "editor.allGoals": "All your goals are selected for this entry.",
   "editor.noGoals": "No goals defined yet. Add some in the “Goals” tab.",
+  "editor.saveError": "Saving failed. Please try again.",
+  "editor.favorite": "Favorite",
+  "editor.context": "Place & weather",
+  "editor.place": "Place",
+  "editor.placePlaceholder": "Where were you? (e.g. Home, Paris…)",
+  "editor.weather": "Weather",
+
+  // Weather
+  "weather.sunny": "Sunny",
+  "weather.partly": "Partly cloudy",
+  "weather.cloudy": "Cloudy",
+  "weather.rainy": "Rainy",
+  "weather.stormy": "Stormy",
+  "weather.snowy": "Snowy",
+  "weather.foggy": "Foggy",
+  "weather.windy": "Windy",
 
   "act.none": "No activities. Add some in Settings.",
 
@@ -379,6 +424,8 @@ const EN = {
   "md.placeholder": "Write whatever comes to mind…",
   "md.linkPlaceholder": "https://example.com",
   "md.apply": "Apply",
+  "md.words": "{n} word",
+  "md.words_plural": "{n} words",
 
   "photo.caption": "Add a caption…",
 
@@ -402,8 +449,11 @@ const EN = {
   "stats.entries": "Entries",
   "stats.avgMood": "Average mood",
   "stats.daysLogged": "Days journaled",
+  "stats.favorites": "Favorites",
   "stats.moodDist": "Mood distribution",
   "stats.topActs": "Most frequent activities",
+  "stats.weatherDist": "Weather distribution",
+  "stats.topPlaces": "Most frequent places",
   "stats.trend": "Trend · last 30 days",
   "stats.trendStart": "30 days ago",
   "stats.trendEnd": "today",

@@ -1,8 +1,9 @@
 import { MOODS_ASC, moodOf, moodLabel } from "../lib/moods.js";
 import { todayKey, addDays } from "../lib/date.js";
 import { activityMap, activityLabel } from "../lib/activities.js";
+import { WEATHERS, weatherLabel } from "../lib/weather.js";
 import { t } from "../lib/i18n.js";
-import { IconFlame, IconTimeline, IconImage, IconStats } from "./Icons.jsx";
+import { IconFlame, IconTimeline, IconImage, IconStats, IconStar, IconMapPin } from "./Icons.jsx";
 
 function isFilled(e) {
   return !!(e && (e.mood || e.text?.trim() || e.images?.length || e.activities?.length));
@@ -68,6 +69,29 @@ export default function StatsView({ entries, entriesByDate, activities }) {
     .slice(0, 10);
   const maxAct = Math.max(1, ...topActs.map((x) => x.n));
 
+  // Favorites
+  const favCount = filled.filter((e) => e.favorite).length;
+
+  // Weather distribution
+  const wCount = {};
+  for (const e of filled) if (e.weather) wCount[e.weather] = (wCount[e.weather] || 0) + 1;
+  const weatherRows = WEATHERS.map((w) => ({ ...w, n: wCount[w.id] || 0 }))
+    .filter((x) => x.n > 0)
+    .sort((a, b) => b.n - a.n);
+  const maxW = Math.max(1, ...weatherRows.map((x) => x.n));
+
+  // Top places
+  const pCount = {};
+  for (const e of filled) {
+    const p = (e.place || "").trim();
+    if (p) pCount[p] = (pCount[p] || 0) + 1;
+  }
+  const topPlaces = Object.entries(pCount)
+    .map(([p, n]) => ({ p, n }))
+    .sort((a, b) => b.n - a.n)
+    .slice(0, 8);
+  const maxP = Math.max(1, ...topPlaces.map((x) => x.n));
+
   return (
     <div className="view">
       <h1 className="page-title">{t("stats.title")}</h1>
@@ -80,6 +104,9 @@ export default function StatsView({ entries, entriesByDate, activities }) {
         <StatTile icon={<IconStats width={16} height={16} />} k={t("stats.avgMood")}
           v={avgMood ? <>{avgMood.emoji} <small>{avg.toFixed(1)}</small></> : "—"} />
         <StatTile icon={<IconImage width={16} height={16} />} k={t("stats.daysLogged")} v={daysCount} />
+        {favCount > 0 && (
+          <StatTile icon={<IconStar width={16} height={16} filled />} k={t("stats.favorites")} v={favCount} />
+        )}
       </div>
 
       <div className="card panel">
@@ -105,6 +132,36 @@ export default function StatsView({ entries, entriesByDate, activities }) {
               <span className="lbl"><span style={{ fontSize: 16 }}>{act.emoji}</span>{activityLabel(act)}</span>
               <div className="dist-track">
                 <div className="dist-fill" style={{ width: `${(n / maxAct) * 100}%`, background: "var(--accent)" }} />
+              </div>
+              <span className="cnt">{n}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {weatherRows.length > 0 && (
+        <div className="card panel">
+          <h3>{t("stats.weatherDist")}</h3>
+          {weatherRows.map((w) => (
+            <div className="dist-row" key={w.id}>
+              <span className="lbl"><span style={{ fontSize: 17 }}>{w.emoji}</span>{weatherLabel(w.id)}</span>
+              <div className="dist-track">
+                <div className="dist-fill" style={{ width: `${(w.n / maxW) * 100}%`, background: "var(--accent)" }} />
+              </div>
+              <span className="cnt">{w.n}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {topPlaces.length > 0 && (
+        <div className="card panel">
+          <h3>{t("stats.topPlaces")}</h3>
+          {topPlaces.map(({ p, n }) => (
+            <div className="dist-row" key={p}>
+              <span className="lbl"><IconMapPin width={15} height={15} />{p}</span>
+              <div className="dist-track">
+                <div className="dist-fill" style={{ width: `${(n / maxP) * 100}%`, background: "var(--accent)" }} />
               </div>
               <span className="cnt">{n}</span>
             </div>
