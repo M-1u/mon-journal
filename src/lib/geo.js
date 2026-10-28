@@ -31,9 +31,12 @@ export function allCountries(lang) {
     .sort((a, b) => a.name.localeCompare(b.name, lang === "en" ? "en" : "fr"));
 }
 
-// Build SVG path data for every country, projected into a WIDTH×HEIGHT box.
+// Equirectangular projection: lon/lat → x/y inside a WIDTH×HEIGHT box.
+export function project(lon, lat, W, H) {
+  return [((lon + 180) / 360) * W, ((90 - lat) / 180) * H];
+}
 function proj(W, H) {
-  return ([lon, lat]) => [((lon + 180) / 360) * W, ((90 - lat) / 180) * H];
+  return ([lon, lat]) => project(lon, lat, W, H);
 }
 
 function ringToPath(ring, p) {

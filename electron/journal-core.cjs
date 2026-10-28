@@ -358,6 +358,7 @@ function upsertEntry(entry) {
     favorite: !!entry.favorite,
     tags: normStrList(entry.tags, true),
     people: normStrList(entry.people, false),
+    tripId: entry.tripId || null,
     createdAt: i >= 0 ? day[i].createdAt : now,
     updatedAt: now,
   };
@@ -433,10 +434,31 @@ function setGoals(list) {
   return clean;
 }
 
-// --- Travel log (countries / cities visited + wishlist) ---
-// Shape: { countries: { [alpha2]: "visited"|"wishlist" }, cities: [{ id, name, country, status }] }
+// --- Travel log (trips + countries) ---
+// Shape: {
+//   countries: { [alpha2]: "visited"|"wishlist" },   // manual map toggles
+//   cities: [{ id, name, country, lat, lon, status }],// standalone pins (legacy)
+//   trips:  [{ id, name, startDate, endDate, transports:[], notes,
+//              cities:[{ id, name, country, lat, lon, arrive, depart, note }] }]
+// }
 const travelFile = () => path.join(activeJournal.path, "travel.json");
-const EMPTY_TRAVEL = { countries: {}, cities: [] };
+const EMPTY_TRAVEL = { countries: {}, cities: [], trips: [] };
+const TRANSPORTS = ["plane", "train", "car", "bus", "boat", "bike", "foot"];
+const num = (v) => (typeof v === "number" && isFinite(v) ? v : null);
+function normCity(c) {
+  if (!c || !c.name) return null;
+  return {
+    id: c.id || crypto.randomUUID(),
+    name: String(c.name).trim(),
+    country: (c.country ? String(c.country).toUpperCase() : "").slice(0, 2),
+    lat: num(c.lat),
+    lon: num(c.lon),
+    arrive: c.arrive || "",
+    depart: c.depart || "",
+    note: typeof c.note === "string" ? c.note : "",
+    status: c.status === "wishlist" ? "wishlist" : "visited",
+  };
+}
 function normalizeTravel(obj) {
   const countries = {};
   if (obj && obj.countries && typeof obj.countries === "object") {
@@ -444,17 +466,19 @@ function normalizeTravel(obj) {
       if (status === "visited" || status === "wishlist") countries[String(code).toUpperCase()] = status;
     }
   }
-  const cities = Array.isArray(obj && obj.cities)
-    ? obj.cities
-        .filter((c) => c && c.name)
-        .map((c) => ({
-          id: c.id || crypto.randomUUID(),
-          name: String(c.name).trim(),
-          country: (c.country ? String(c.country).toUpperCase() : "").slice(0, 2),
-          status: c.status === "wishlist" ? "wishlist" : "visited",
-        }))
+  const cities = Array.isArray(obj && obj.cities) ? obj.cities.map(normCity).filter(Boolean) : [];
+  const trips = Array.isArray(obj && obj.trips)
+    ? obj.trips.filter((t) => t && (t.name || (t.cities && t.cities.length))).map((t) => ({
+        id: t.id || crypto.randomUUID(),
+        name: typeof t.name === "string" ? t.name.trim() : "",
+        startDate: t.startDate || "",
+        endDate: t.endDate || "",
+        transports: Array.isArray(t.transports) ? t.transports.filter((x) => TRANSPORTS.includes(x)) : [],
+        notes: typeof t.notes === "string" ? t.notes : "",
+        cities: Array.isArray(t.cities) ? t.cities.map(normCity).filter(Boolean) : [],
+      }))
     : [];
-  return { countries, cities };
+  return { countries, cities, trips };
 }
 function getTravel() {
   if (!activeJournal) return { ...EMPTY_TRAVEL };
@@ -538,7 +562,10 @@ function importData(obj) {
     const cityIds = new Set(cur.cities.map((c) => c.id));
     const cities = [...cur.cities];
     for (const c of obj.travel.cities || []) if (c && !cityIds.has(c.id)) cities.push(c);
-    setTravel({ countries, cities });
+    const tripIds = new Set((cur.trips || []).map((tr) => tr.id));
+    const trips = [...(cur.trips || [])];
+    for (const tr of obj.travel.trips || []) if (tr && !tripIds.has(tr.id)) trips.push(tr);
+    setTravel({ countries, cities, trips });
   }
 
   // Upsert entries (keep their ids so re-importing is idempotent).

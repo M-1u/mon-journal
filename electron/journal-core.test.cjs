@@ -165,6 +165,27 @@ ok("tags/people intact after lock", te2.tags.includes("projet") && te2.people.in
 const exp4 = core.exportData();
 ok("export carries tags/people", JSON.stringify(exp4).includes("projet") && JSON.stringify(exp4).includes("Marie"));
 
+// 15. Trips + entry linking
+core.setTravel({
+  countries: {},
+  cities: [],
+  trips: [{
+    name: "Japon 2026", startDate: "2026-04-01", endDate: "2026-04-15",
+    transports: ["plane", "train", "nope"],
+    cities: [{ name: "Tokyo", country: "jp", lat: 35.68, lon: 139.69, arrive: "2026-04-01" }, { name: "" }],
+  }],
+});
+const tr = core.getTravel();
+ok("trip saved with id", tr.trips.length === 1 && !!tr.trips[0].id);
+ok("invalid transport filtered", JSON.stringify(tr.trips[0].transports) === JSON.stringify(["plane", "train"]));
+ok("trip city normalized (coords + country upper)", tr.trips[0].cities.length === 1 && tr.trips[0].cities[0].country === "JP" && tr.trips[0].cities[0].lat === 35.68);
+const tripId = tr.trips[0].id;
+const le = core.upsertEntry({ date: "2026-04-02", time: "10:00", text: "Shibuya", tripId });
+ok("entry linked to trip", le.tripId === tripId);
+core.lockJournal();
+ok("re-unlock after trips", !!core.unlockJournal(j2reg.id, "pw12345"));
+ok("trip + link intact after lock", core.getTravel().trips[0].name === "Japon 2026" && core.listEntries().find((e) => e.id === le.id).tripId === tripId);
+
 console.log(`\n${pass} checks passed.`);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log("(temp dir cleaned)");

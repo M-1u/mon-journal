@@ -10,7 +10,7 @@ import { t } from "../lib/i18n.js";
 import { IconChevronLeft, IconEdit, IconTrash, IconCheck, IconClose, IconStar } from "./Icons.jsx";
 
 // Read-only view of one entry, with a button to switch to editing.
-export default function EntryReadView({ entry, activities, goals, onEdit, onDelete, onToggleFavorite, onBack }) {
+export default function EntryReadView({ entry, activities, goals, trip, onEdit, onDelete, onToggleFavorite, onBack }) {
   const [lightbox, setLightbox] = useState(null);
   const [fav, setFav] = useState(!!entry.favorite);
   const mood = moodOf(entry.mood);
@@ -64,6 +64,8 @@ export default function EntryReadView({ entry, activities, goals, onEdit, onDele
           <span>{moodLabel(mood.value)}</span>
         </div>
       )}
+
+      {trip ? <div className="er-trip">🧳 {trip.name}</div> : null}
 
       {(entry.place || entry.weather) ? (
         <div className="er-context">

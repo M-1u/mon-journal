@@ -45,7 +45,7 @@ export default function App() {
   const [entries, setEntries] = useState([]); // flat list of entries
   const [activities, setActivities] = useState([]);
   const [goals, setGoals] = useState([]);
-  const [travel, setTravel] = useState({ countries: {}, cities: [] });
+  const [travel, setTravel] = useState({ countries: {}, cities: [], trips: [] });
   const travelRef = useRef(travel);
   travelRef.current = travel;
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
@@ -66,7 +66,7 @@ export default function App() {
     setEntries(list);
     setActivities(acts);
     setGoals(gls);
-    setTravel(trv || { countries: {}, cities: [] });
+    setTravel(trv || { countries: {}, cities: [], trips: [] });
     setStorageRoot(root);
     setJournalName(journal.name);
     setView("today");
@@ -162,7 +162,7 @@ export default function App() {
     setEntries([]);
     setActivities([]);
     setGoals([]);
-    setTravel({ countries: {}, cities: [] });
+    setTravel({ countries: {}, cities: [], trips: [] });
     setSettings(DEFAULT_SETTINGS);
     setJournalName("");
     setJournals(await storage.listJournals());
@@ -240,6 +240,16 @@ export default function App() {
   const handleRemoveCity = useCallback((id) => {
     applyTravel({ ...travelRef.current, cities: (travelRef.current.cities || []).filter((c) => c.id !== id) });
   }, [applyTravel]);
+  const handleSaveTrip = useCallback((trip) => {
+    const trips = [...(travelRef.current.trips || [])];
+    const i = trips.findIndex((t) => t.id === trip.id);
+    if (i >= 0) trips[i] = trip;
+    else trips.push(trip);
+    applyTravel({ ...travelRef.current, trips });
+  }, [applyTravel]);
+  const handleDeleteTrip = useCallback((id) => {
+    applyTravel({ ...travelRef.current, trips: (travelRef.current.trips || []).filter((t) => t.id !== id) });
+  }, [applyTravel]);
 
   const changeLang = useCallback((l) => {
     setLang(l);
@@ -263,7 +273,7 @@ export default function App() {
     setEntries(list);
     setActivities(acts);
     setGoals(gls);
-    setTravel(trv || { countries: {}, cities: [] });
+    setTravel(trv || { countries: {}, cities: [], trips: [] });
   }, []);
 
   // Auto-lock after a period of inactivity (per-journal setting, minutes).
@@ -361,6 +371,7 @@ export default function App() {
             placeSuggestions={placeSuggestions}
             tagSuggestions={tagSuggestions}
             peopleSuggestions={peopleSuggestions}
+            trips={travel.trips || []}
             onDateChange={setDate}
             onSaveEntry={handleSaveEntry}
             onDeleteEntry={handleDeleteEntry}
@@ -378,10 +389,12 @@ export default function App() {
             <TravelView
               travel={travel}
               lang={lang}
+              entries={entries}
               onCycleCountry={handleCycleCountry}
               onRemoveCountry={handleRemoveCountry}
-              onAddCity={handleAddCity}
-              onRemoveCity={handleRemoveCity}
+              onSaveTrip={handleSaveTrip}
+              onDeleteTrip={handleDeleteTrip}
+              onOpenDay={openDay}
             />
           </Suspense>
         )}

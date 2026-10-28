@@ -17,7 +17,7 @@ function excerpt(text) {
   return (text || "").replace(/[#*_`>\-[\]]/g, "").replace(/\n+/g, " ").trim();
 }
 
-function EntryCard({ entry, actMap, onClick }) {
+function EntryCard({ entry, actMap, trip, onClick }) {
   const mood = moodOf(entry.mood);
   const imgs = normImages(entry.images);
   return (
@@ -33,6 +33,7 @@ function EntryCard({ entry, actMap, onClick }) {
           {entry.favorite && <span className="de-fav" aria-label={t("editor.favorite")}>★</span>}
         </span>
         {entry.place ? <div className="de-place">📍 {entry.place}</div> : null}
+        {trip ? <div className="de-trip">🧳 {trip.name}</div> : null}
         {entry.activities?.length ? (
           <div className="de-acts">
             {entry.activities.map((id) =>
@@ -68,7 +69,9 @@ function EntryCard({ entry, actMap, onClick }) {
   );
 }
 
-export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, placeSuggestions, tagSuggestions, peopleSuggestions, onDateChange, onSaveEntry, onDeleteEntry, onToggleFavorite }) {
+export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, placeSuggestions, tagSuggestions, peopleSuggestions, trips, onDateChange, onSaveEntry, onDeleteEntry, onToggleFavorite }) {
+  const tripMap = {};
+  for (const tr of trips || []) tripMap[tr.id] = tr;
   const [editing, setEditing] = useState(null); // null | 'new' | entry
   const [viewing, setViewing] = useState(null); // null | entry (read mode)
   const [saveError, setSaveError] = useState("");
@@ -119,6 +122,7 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
             placeSuggestions={placeSuggestions}
             tagSuggestions={tagSuggestions}
             peopleSuggestions={peopleSuggestions}
+            trips={trips}
             onSave={handleSave}
             onDelete={handleDelete}
             onCancel={() => { setEditing(null); setSaveError(""); }}
@@ -135,6 +139,7 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
           entry={viewing}
           activities={activities}
           goals={goals}
+          trip={tripMap[viewing.tripId]}
           onEdit={(entry) => { setViewing(null); setEditing(entry); }}
           onDelete={handleDelete}
           onToggleFavorite={onToggleFavorite}
@@ -194,7 +199,7 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
           ) : (
             <div className="day-entries">
               {entries.map((e) => (
-                <EntryCard key={e.id} entry={e} actMap={actMap} onClick={() => setViewing(e)} />
+                <EntryCard key={e.id} entry={e} actMap={actMap} trip={tripMap[e.tripId]} onClick={() => setViewing(e)} />
               ))}
             </div>
           )}

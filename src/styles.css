@@ -2125,3 +2125,82 @@ body.privacy-blur .main::after {
 }
 .lbl-tag { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
 .lbl-person { background: color-mix(in srgb, #8b5cf6 18%, transparent); color: #8b5cf6; }
+
+/* ── Travel redesign: zoomable map, pins, trips, trip editor ───────────── */
+.map-wrap { position: relative; }
+.world-map { touch-action: none; }
+.world-map .map-pin { fill: #e5544b; stroke: #fff; cursor: pointer; }
+.world-map .map-pin.wish { fill: #f0b429; }
+.world-map .map-pin:hover { fill: #c0392b; }
+.map-legend .pin-dot { width: 10px; height: 10px; border-radius: 50%; background: #e5544b; border: 1.5px solid #fff; box-shadow: 0 0 0 1px var(--border); }
+.map-controls {
+  position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 4px;
+}
+.map-controls button {
+  width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink); font-size: 17px; cursor: pointer; line-height: 1;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+}
+.map-controls button:hover { background: var(--surface-hover); border-color: var(--accent); }
+.map-pin-label {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+  background: var(--ink); color: var(--bg); padding: 4px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; pointer-events: none;
+}
+
+.de-trip, .er-trip { color: var(--accent); font-size: 12.5px; font-weight: 600; margin-top: 3px; }
+.er-trip { font-size: 14px; margin-top: 14px; }
+
+/* Trip list */
+.trip-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.trip-card {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface-2); color: var(--ink); cursor: pointer;
+}
+.trip-card:hover { border-color: var(--accent); background: var(--surface-hover); }
+.trip-card .tc-body { flex: 1; min-width: 0; }
+.tc-name { font-weight: 700; font-size: 15px; }
+.tc-meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--ink-faint); font-size: 12.5px; margin-top: 4px; }
+.tc-cities { color: var(--ink-soft, var(--ink-faint)); font-size: 13px; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Trip editor */
+.trip-editor .trip-name {
+  width: 100%; font-size: 20px; font-weight: 700; padding: 10px 12px; margin: 6px 0 14px;
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); color: var(--ink);
+}
+.trip-dates { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 8px; }
+.trip-dates label, .ts-dates label { display: flex; flex-direction: column; font-size: 12.5px; color: var(--ink-faint); gap: 4px; }
+.trip-dates input, .ts-dates input, .trip-notes {
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--ink); font-size: 14px;
+}
+.transport-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.transport-btn {
+  width: 42px; height: 42px; border-radius: 10px; font-size: 20px; border: 1px solid var(--border);
+  background: var(--surface-2); cursor: pointer; filter: grayscale(.6) opacity(.6);
+}
+.transport-btn:hover { filter: none; }
+.transport-btn.on { filter: none; border-color: var(--accent); background: var(--surface-hover); }
+
+.city-search { position: relative; display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; color: var(--ink-faint); }
+.city-search input { flex: 1; border: none; background: transparent; color: var(--ink); padding: 10px 0; font-size: 14px; outline: none; }
+.city-results { position: absolute; top: 100%; left: 0; right: 0; z-index: 20; margin-top: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.18); overflow: hidden; }
+.city-result { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 14px; border: none; background: transparent; color: var(--ink); cursor: pointer; font-size: 14px; }
+.city-result:hover { background: var(--surface-hover); }
+.city-result .cr-country { color: var(--ink-faint); font-size: 12.5px; }
+.city-result.free { border-top: 1px solid var(--border); color: var(--accent); font-weight: 600; }
+
+.trip-stages { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.trip-stage { display: flex; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); }
+.ts-order { display: flex; flex-direction: column; gap: 4px; }
+.ts-order button { width: 24px; height: 22px; border: 1px solid var(--border); background: var(--surface); border-radius: 6px; cursor: pointer; color: var(--ink-faint); font-size: 10px; }
+.ts-order button:disabled { opacity: .3; cursor: default; }
+.ts-body { flex: 1; min-width: 0; }
+.ts-head { display: flex; justify-content: space-between; align-items: center; }
+.ts-name { font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+.ts-country { color: var(--ink-faint); font-weight: 400; }
+.ts-nopin { color: #f0b429; }
+.ts-rm { border: none; background: transparent; cursor: pointer; color: var(--ink-faint); }
+.ts-rm:hover { color: var(--danger, #e5544b); }
+.ts-dates { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0; }
+.ts-note { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 13px; }
+.trip-notes { width: 100%; resize: vertical; font-family: inherit; }

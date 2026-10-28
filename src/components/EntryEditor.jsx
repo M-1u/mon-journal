@@ -24,7 +24,7 @@ const TEMPLATES = [
 ];
 
 // Full form to create or edit one entry.
-export default function EntryEditor({ date, entry, activities, goals, placeSuggestions, tagSuggestions, peopleSuggestions, onSave, onDelete, onCancel }) {
+export default function EntryEditor({ date, entry, activities, goals, placeSuggestions, tagSuggestions, peopleSuggestions, trips, onSave, onDelete, onCancel }) {
   const isNew = !entry;
   const [time, setTime] = useState(entry?.time || nowTime());
   const [mood, setMood] = useState(entry?.mood ?? null);
@@ -37,6 +37,7 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
   const [favorite, setFavorite] = useState(!!entry?.favorite);
   const [tags, setTags] = useState(entry?.tags || []);
   const [people, setPeople] = useState(entry?.people || []);
+  const [tripId, setTripId] = useState(entry?.tripId || "");
   const [dragOver, setDragOver] = useState(false);
 
   async function addImageFiles(fileList) {
@@ -81,7 +82,7 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
   }
 
   function save() {
-    onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images, place: place.trim(), weather, favorite, tags, people });
+    onSave({ id: entry?.id, date, time, mood, activities: acts, goals: goalIds, text, images, place: place.trim(), weather, favorite, tags, people, tripId: tripId || null });
   }
 
   const canSave =
@@ -169,6 +170,18 @@ export default function EntryEditor({ date, entry, activities, goals, placeSugge
           ))}
         </div>
       </div>
+
+      {trips && trips.length > 0 && (
+        <>
+          <p className="section-label">🧳 {t("editor.trip")}</p>
+          <select className="goal-select" value={tripId} onChange={(e) => setTripId(e.target.value)} aria-label={t("editor.trip")}>
+            <option value="">{t("editor.noTrip")}</option>
+            {trips.map((tr) => (
+              <option key={tr.id} value={tr.id}>{tr.name || t("trip.untitled")}</option>
+            ))}
+          </select>
+        </>
+      )}
 
       <p className="section-label">{t("editor.activities")}</p>
       <ActivityPicker activities={activities} selected={acts} onToggle={toggleAct} />

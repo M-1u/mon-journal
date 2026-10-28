@@ -1,49 +1,74 @@
 import { useMemo, useState } from "react";
-import { buildCountryPaths, countryName, allCountries, WORLD_COUNTRIES } from "../lib/geo.js";
+import { buildCountryPaths, countryName, project, WORLD_COUNTRIES } from "../lib/geo.js";
 import { t } from "../lib/i18n.js";
-import { IconClose, IconPlus, IconMapPin } from "./Icons.jsx";
+import { IconPlus, IconMapPin, IconChevronRight } from "./Icons.jsx";
+import WorldMap from "./WorldMap.jsx";
+import TripEditor, { TRANSPORTS } from "./TripEditor.jsx";
 
 const MAP_W = 1000;
 const MAP_H = 500;
+const transportEmoji = Object.fromEntries(TRANSPORTS.map((x) => [x.id, x.emoji]));
 
-export default function TravelView({ travel, lang, onCycleCountry, onRemoveCountry, onAddCity, onRemoveCity }) {
+export default function TravelView({ travel, lang, entries, onCycleCountry, onRemoveCountry, onSaveTrip, onDeleteTrip, onOpenDay }) {
   const countries = travel?.countries || {};
-  const cities = travel?.cities || [];
+  const trips = travel?.trips || [];
+  const standalone = travel?.cities || [];
   const paths = useMemo(() => buildCountryPaths(MAP_W, MAP_H), []);
-  const countryOptions = useMemo(() => allCountries(lang), [lang]);
 
-  const [hover, setHover] = useState(null);
-  const [cityName, setCityName] = useState("");
-  const [cityCountry, setCityCountry] = useState("");
-  const [cityStatus, setCityStatus] = useState("visited");
+  const [editing, setEditing] = useState(null); // null | 'new' | trip
 
-  const visited = Object.entries(countries).filter(([, s]) => s === "visited").map(([a]) => a);
-  const wishlist = Object.entries(countries).filter(([, s]) => s === "wishlist").map(([a]) => a);
+  // Countries that count as visited = manual "visited" + any country in a trip.
+  const effectiveCountries = useMemo(() => {
+    const out = { ...countries };
+    const markVisited = (cc) => { if (cc && out[cc] !== "visited") out[cc] = "visited"; };
+    for (const tr of trips) for (const c of tr.cities || []) markVisited(c.country);
+    for (const c of standalone) if (c.status === "visited") markVisited(c.country);
+    return out;
+  }, [countries, trips, standalone]);
+
+  const visited = Object.entries(effectiveCountries).filter(([, s]) => s === "visited").map(([a]) => a);
+  const wishlist = Object.entries(effectiveCountries).filter(([, s]) => s === "wishlist").map(([a]) => a);
   const pct = Math.round((visited.length / WORLD_COUNTRIES) * 100);
 
-  const cycle = (alpha2) => onCycleCountry(alpha2);
-  const setCountryStatus = (alpha2, status) => { if (!status) onRemoveCountry(alpha2); };
+  // Map pins: every located city from trips + standalone.
+  const pins = useMemo(() => {
+    const out = [];
+    const seen = new Set();
+    const push = (c, status) => {
+      if (c.lat == null || c.lon == null) return;
+      const key = c.lat + "," + c.lon;
+      if (seen.has(key)) return;
+      seen.add(key);
+      const [x, y] = project(c.lon, c.lat, MAP_W, MAP_H);
+      out.push({ x, y, label: c.name, status });
+    };
+    for (const tr of trips) for (const c of tr.cities || []) push(c, "visited");
+    for (const c of standalone) push(c, c.status === "wishlist" ? "wishlist" : "visited");
+    return out;
+  }, [trips, standalone]);
 
-  function addCity(e) {
-    e.preventDefault();
-    const name = cityName.trim();
-    if (!name) return;
-    onAddCity({
-      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-      name,
-      country: cityCountry,
-      status: cityStatus,
-    });
-    setCityName("");
-  }
-  const removeCity = (id) => onRemoveCity(id);
+  const cityCount = pins.length;
 
   const fillFor = (alpha2) => {
-    const s = countries[alpha2];
+    const s = effectiveCountries[alpha2];
     if (s === "visited") return "var(--accent)";
     if (s === "wishlist") return "#f0b429";
     return "var(--map-land, #d7dee6)";
   };
+
+  if (editing) {
+    return (
+      <TripEditor
+        trip={editing === "new" ? null : editing}
+        lang={lang}
+        onSave={(trip) => { onSaveTrip(trip); setEditing(null); }}
+        onDelete={(trip) => { onDeleteTrip(trip.id); setEditing(null); }}
+        onCancel={() => setEditing(null)}
+      />
+    );
+  }
+
+  const tripEntryCount = (id) => entries.filter((e) => e.tripId === id).length;
 
   return (
     <div className="view">
@@ -51,10 +76,10 @@ export default function TravelView({ travel, lang, onCycleCountry, onRemoveCount
       <p className="page-sub">{t("travel.sub")}</p>
 
       <div className="stat-grid">
+        <div className="card stat-tile"><div className="k">🧳 {t("travel.trips")}</div><div className="v">{trips.length}</div></div>
         <div className="card stat-tile"><div className="k">🌍 {t("travel.visited")}</div><div className="v">{visited.length}</div></div>
         <div className="card stat-tile"><div className="k">📊 {t("travel.worldPct")}</div><div className="v">{pct}<small>%</small></div></div>
-        <div className="card stat-tile"><div className="k">✨ {t("travel.wish")}</div><div className="v">{wishlist.length}</div></div>
-        <div className="card stat-tile"><div className="k">📍 {t("travel.cities")}</div><div className="v">{cities.filter((c) => c.status === "visited").length}</div></div>
+        <div className="card stat-tile"><div className="k">📍 {t("travel.cities")}</div><div className="v">{cityCount}</div></div>
       </div>
 
       <div className="card panel">
@@ -63,102 +88,58 @@ export default function TravelView({ travel, lang, onCycleCountry, onRemoveCount
           <div className="map-legend">
             <span><i style={{ background: "var(--accent)" }} /> {t("travel.legendVisited")}</span>
             <span><i style={{ background: "#f0b429" }} /> {t("travel.legendWish")}</span>
-            <span className="map-hint">{hover ? hover : t("travel.mapHint")}</span>
+            <span><i className="pin-dot" /> {t("travel.legendCity")}</span>
           </div>
         </div>
-        <div className="map-wrap">
-          <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="world-map" role="img" aria-label={t("travel.map")}>
-            <rect x="0" y="0" width={MAP_W} height={MAP_H} fill="var(--map-sea, #eaf1f6)" />
-            {paths.map((c) => (
-              <path
-                key={c.id}
-                d={c.d}
-                fill={fillFor(c.alpha2)}
-                stroke="var(--map-stroke, #ffffff)"
-                strokeWidth="0.5"
-                className={"country" + (c.alpha2 ? "" : " inert")}
-                onClick={() => cycle(c.alpha2)}
-                onMouseEnter={() => c.alpha2 && setHover(countryName(c.alpha2, lang) + " · " + (countries[c.alpha2] === "visited" ? t("travel.legendVisited") : countries[c.alpha2] === "wishlist" ? t("travel.legendWish") : t("travel.notYet")))}
-                onMouseLeave={() => setHover(null)}
-              />
-            ))}
-          </svg>
-        </div>
-        <p className="map-foot">{t("travel.mapCycle")}</p>
+        <WorldMap paths={paths} fillFor={fillFor} onCountryClick={onCycleCountry} pins={pins} ariaLabel={t("travel.map")} />
+        <p className="map-foot">{t("travel.mapHelp")}</p>
       </div>
 
-      {(visited.length > 0 || wishlist.length > 0) && (
-        <div className="card panel">
-          <h3>{t("travel.countriesList")}</h3>
-          {visited.length > 0 && (
-            <div className="country-group">
-              <div className="cg-label">🌍 {t("travel.visited")} ({visited.length})</div>
-              <div className="country-chips">
-                {visited.map((a) => (
-                  <span className="country-chip visited" key={a}>
-                    {countryName(a, lang)}
-                    <button onClick={() => setCountryStatus(a, undefined)} aria-label={t("common.remove")}><IconClose width={11} height={11} /></button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          {wishlist.length > 0 && (
-            <div className="country-group">
-              <div className="cg-label">✨ {t("travel.wish")} ({wishlist.length})</div>
-              <div className="country-chips">
-                {wishlist.map((a) => (
-                  <span className="country-chip wish" key={a}>
-                    {countryName(a, lang)}
-                    <button onClick={() => setCountryStatus(a, undefined)} aria-label={t("common.remove")}><IconClose width={11} height={11} /></button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       <div className="card panel">
-        <h3>{t("travel.citiesTitle")}</h3>
-        <form className="city-add" onSubmit={addCity}>
-          <input
-            className="city-name"
-            value={cityName}
-            onChange={(e) => setCityName(e.target.value)}
-            placeholder={t("travel.cityPlaceholder")}
-            aria-label={t("travel.cityName")}
-          />
-          <select value={cityCountry} onChange={(e) => setCityCountry(e.target.value)} aria-label={t("travel.country")}>
-            <option value="">{t("travel.pickCountry")}</option>
-            {countryOptions.map((c) => (
-              <option key={c.alpha2} value={c.alpha2}>{c.name}</option>
-            ))}
-          </select>
-          <div className="seg">
-            <button type="button" className={cityStatus === "visited" ? "on" : ""} onClick={() => setCityStatus("visited")}>🌍 {t("travel.visitedShort")}</button>
-            <button type="button" className={cityStatus === "wishlist" ? "on" : ""} onClick={() => setCityStatus("wishlist")}>✨ {t("travel.wishShort")}</button>
-          </div>
-          <button type="submit" className="btn primary" disabled={!cityName.trim()}>
-            <IconPlus width={16} height={16} /> {t("common.add")}
+        <div className="map-head">
+          <h3 style={{ margin: 0 }}>{t("travel.myTrips")}</h3>
+          <button className="btn primary" onClick={() => setEditing("new")}>
+            <IconPlus width={16} height={16} /> {t("trip.new")}
           </button>
-        </form>
-
-        {cities.length === 0 ? (
-          <p style={{ color: "var(--ink-faint)", fontSize: 13, marginTop: 10 }}>{t("travel.noCities")}</p>
+        </div>
+        {trips.length === 0 ? (
+          <p style={{ color: "var(--ink-faint)", fontSize: 13, marginTop: 8 }}>{t("travel.noTrips")}</p>
         ) : (
-          <div className="city-list">
-            {cities.map((c) => (
-              <span className={"city-chip " + c.status} key={c.id}>
-                <IconMapPin width={13} height={13} />
-                {c.name}{c.country ? <span className="city-country"> · {countryName(c.country, lang)}</span> : null}
-                {c.status === "wishlist" ? " ✨" : ""}
-                <button onClick={() => removeCity(c.id)} aria-label={t("common.remove")}><IconClose width={11} height={11} /></button>
-              </span>
+          <div className="trip-list">
+            {trips.slice().sort((a, b) => (b.startDate || "").localeCompare(a.startDate || "")).map((tr) => (
+              <button className="trip-card" key={tr.id} onClick={() => setEditing(tr)}>
+                <div className="tc-body">
+                  <div className="tc-name">{tr.name || t("trip.untitled")}</div>
+                  <div className="tc-meta">
+                    {tr.startDate ? <span>{tr.startDate}{tr.endDate ? " → " + tr.endDate : ""}</span> : null}
+                    {tr.cities?.length ? <span>📍 {tr.cities.length}</span> : null}
+                    {tr.transports?.map((x) => <span key={x}>{transportEmoji[x]}</span>)}
+                    {tripEntryCount(tr.id) ? <span>📝 {tripEntryCount(tr.id)}</span> : null}
+                  </div>
+                  {tr.cities?.length ? (
+                    <div className="tc-cities">{tr.cities.map((c) => c.name).join(" · ")}</div>
+                  ) : null}
+                </div>
+                <IconChevronRight width={18} height={18} />
+              </button>
             ))}
           </div>
         )}
       </div>
+
+      {(wishlist.length > 0) && (
+        <div className="card panel">
+          <h3>{t("travel.wishlist")}</h3>
+          <div className="country-chips">
+            {wishlist.map((a) => (
+              <span className="country-chip wish" key={a}>
+                {countryName(a, lang)}
+                <button onClick={() => onRemoveCountry(a)} aria-label={t("common.remove")}>×</button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

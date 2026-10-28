@@ -186,6 +186,7 @@ export const storage = {
       favorite: !!entry.favorite,
       tags: normStrList(entry.tags, true),
       people: normStrList(entry.people, false),
+      tripId: entry.tripId || null,
       createdAt: i >= 0 ? list[i].createdAt : now,
       updatedAt: now,
     };
@@ -237,13 +238,18 @@ export const storage = {
   // --- Travel log ---
   async getTravel() {
     if (isElectron) return api.getTravel();
-    if (!fbActiveId) return { countries: {}, cities: [] };
-    return lsRead(jkey("travel"), { countries: {}, cities: [] });
+    if (!fbActiveId) return { countries: {}, cities: [], trips: [] };
+    const t = lsRead(jkey("travel"), { countries: {}, cities: [], trips: [] });
+    return { countries: t.countries || {}, cities: t.cities || [], trips: t.trips || [] };
   },
   async setTravel(obj) {
     if (isElectron) return api.setTravel(obj);
-    if (!fbActiveId) return { countries: {}, cities: [] };
-    const clean = { countries: obj?.countries || {}, cities: Array.isArray(obj?.cities) ? obj.cities : [] };
+    if (!fbActiveId) return { countries: {}, cities: [], trips: [] };
+    const clean = {
+      countries: obj?.countries || {},
+      cities: Array.isArray(obj?.cities) ? obj.cities : [],
+      trips: Array.isArray(obj?.trips) ? obj.trips : [],
+    };
     lsWrite(jkey("travel"), clean);
     return clean;
   },
@@ -408,6 +414,7 @@ function fbApplyImport(obj) {
       favorite: !!e.favorite,
       tags: normStrList(e.tags, true),
       people: normStrList(e.people, false),
+      tripId: e.tripId || null,
       createdAt: e.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
