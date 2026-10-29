@@ -136,6 +136,12 @@ export const IconGlobe = (p) => (
     <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" />
   </svg>
 );
+export const IconInsight = (p) => (
+  <svg {...base} {...p}>
+    <path d="M9 18h6M10 21h4" />
+    <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z" />
+  </svg>
+);
 export const IconMic = (p) => (
   <svg {...base} {...p}>
     <rect x="9" y="3" width="6" height="11" rx="3" />

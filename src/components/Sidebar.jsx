@@ -8,6 +8,7 @@ import {
   IconTarget,
   IconSearch,
   IconGlobe,
+  IconInsight,
 } from "./Icons.jsx";
 import { t } from "../lib/i18n.js";
 import BrandMark from "./BrandMark.jsx";
@@ -20,6 +21,7 @@ const NAV = [
   { id: "travel", key: "nav.travel", Icon: IconGlobe },
   { id: "goals", key: "nav.goals", Icon: IconTarget },
   { id: "stats", key: "nav.stats", Icon: IconStats },
+  { id: "insights", key: "nav.insights", Icon: IconInsight },
   { id: "gallery", key: "nav.gallery", Icon: IconGallery },
   { id: "settings", key: "nav.settings", Icon: IconSettings },
 ];

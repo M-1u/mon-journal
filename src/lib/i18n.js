@@ -27,9 +27,21 @@ const FR = {
   "nav.travel": "Voyages",
   "nav.goals": "Objectifs",
   "nav.stats": "Statistiques",
+  "nav.insights": "Analyses",
   "nav.gallery": "Galerie",
   "nav.search": "Recherche",
   "nav.settings": "Réglages",
+
+  // Insights
+  "insights.title": "Analyses",
+  "insights.sub": "Ce qui influence ton humeur, et une carte de ton année.",
+  "insights.empty": "Pas encore assez d'entrées avec une humeur pour analyser.",
+  "insights.heatmap": "Ton année en humeurs",
+  "insights.worse": "moins bien",
+  "insights.better": "mieux",
+  "insights.byWeather": "Humeur moyenne selon la météo",
+  "insights.byActivity": "Humeur moyenne selon l'activité",
+  "insights.byPeople": "Humeur moyenne selon les personnes",
 
   // Travel
   "travel.title": "Voyages",
@@ -431,9 +443,20 @@ const EN = {
   "nav.travel": "Travel",
   "nav.goals": "Goals",
   "nav.stats": "Statistics",
+  "nav.insights": "Insights",
   "nav.gallery": "Gallery",
   "nav.search": "Search",
   "nav.settings": "Settings",
+
+  "insights.title": "Insights",
+  "insights.sub": "What shapes your mood, and a map of your year.",
+  "insights.empty": "Not enough entries with a mood to analyze yet.",
+  "insights.heatmap": "Your year in moods",
+  "insights.worse": "worse",
+  "insights.better": "better",
+  "insights.byWeather": "Average mood by weather",
+  "insights.byActivity": "Average mood by activity",
+  "insights.byPeople": "Average mood by people",
 
   "travel.title": "Travel",
   "travel.sub": "Your world map: countries and cities visited, and your wishlist.",

@@ -7,6 +7,7 @@ import StatsView from "./components/StatsView.jsx";
 import GalleryView from "./components/GalleryView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import GoalsView from "./components/GoalsView.jsx";
+import InsightsView from "./components/InsightsView.jsx";
 import SearchView from "./components/SearchView.jsx";
 import LockScreen from "./components/LockScreen.jsx";
 // Travel view bundles the world map + country data; load it on demand.
@@ -444,6 +445,9 @@ export default function App() {
         )}
         {view === "stats" && (
           <StatsView entries={entries} entriesByDate={entriesByDate} activities={activities} trackers={trackers} />
+        )}
+        {view === "insights" && (
+          <InsightsView entries={entries} entriesByDate={entriesByDate} activities={activities} />
         )}
         {view === "gallery" && <GalleryView entries={entries} onOpenDay={openDay} />}
         {view === "settings" && (

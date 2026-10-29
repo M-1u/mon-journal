@@ -2313,3 +2313,18 @@ body.privacy-blur .main::after {
   padding: 2px 9px; border-radius: 999px; margin-bottom: 6px;
 }
 .er-range { font-size: 13.5px; margin-top: 14px; }
+
+/* ── Insights (correlations + mood heatmap) ───────────────────────────── */
+.corr-row { display: grid; grid-template-columns: minmax(120px, 1fr) 2fr auto; align-items: center; gap: 12px; margin-bottom: 10px; }
+.corr-label { font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+.corr-bar { height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.corr-fill { height: 100%; border-radius: 999px; }
+.corr-val { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink-dim); white-space: nowrap; }
+.corr-val small { color: var(--ink-faint); margin-left: 2px; }
+
+.heatmap { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 4px; }
+.heat-week { display: flex; flex-direction: column; gap: 3px; }
+.heat-cell { width: 12px; height: 12px; border-radius: 3px; background: var(--surface-2); }
+.heat-cell.empty { background: transparent; }
+.heat-legend { display: flex; align-items: center; gap: 5px; margin-top: 12px; font-size: 12px; color: var(--ink-faint); }
+.heat-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
