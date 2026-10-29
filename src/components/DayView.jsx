@@ -19,7 +19,7 @@ function excerpt(text) {
   return (text || "").replace(/[#*_`>\-[\]]/g, "").replace(/\n+/g, " ").trim();
 }
 
-function EntryCard({ entry, actMap, trip, onClick }) {
+function EntryCard({ entry, actMap, trip, onClick, onOpenLabel }) {
   const mood = moodOf(entry.mood);
   const imgs = normImages(entry.images);
   return (
@@ -59,8 +59,12 @@ function EntryCard({ entry, actMap, trip, onClick }) {
         {entry.audio?.length ? <div className="de-audio">🎙️ {t("day.voiceNote", { n: entry.audio.length })}</div> : null}
         {(entry.tags?.length || entry.people?.length) ? (
           <div className="de-labels">
-            {(entry.tags || []).map((tg) => <span className="lbl-tag" key={"t" + tg}>#{tg}</span>)}
-            {(entry.people || []).map((p) => <span className="lbl-person" key={"p" + p}>@{p}</span>)}
+            {(entry.tags || []).map((tg) => (
+              <button className="lbl-tag" key={"t" + tg} onClick={(e) => { e.stopPropagation(); onOpenLabel?.("tag", tg); }}>#{tg}</button>
+            ))}
+            {(entry.people || []).map((p) => (
+              <button className="lbl-person" key={"p" + p} onClick={(e) => { e.stopPropagation(); onOpenLabel?.("person", p); }}>@{p}</button>
+            ))}
           </div>
         ) : null}
         {imgs.length ? (
@@ -75,7 +79,7 @@ function EntryCard({ entry, actMap, trip, onClick }) {
   );
 }
 
-export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, placeSuggestions, tagSuggestions, peopleSuggestions, trips, tasks, trackers, onDateChange, onSaveEntry, onDeleteEntry, onToggleFavorite, onTasksChange, onTrackersChange }) {
+export default function DayView({ date, dayEntries, allEntries, activities, goals, newEntrySignal, placeSuggestions, tagSuggestions, peopleSuggestions, trips, tasks, trackers, onDateChange, onSaveEntry, onDeleteEntry, onToggleFavorite, onTasksChange, onTrackersChange, onOpenLabel }) {
   const tripMap = {};
   for (const tr of trips || []) tripMap[tr.id] = tr;
   const [editing, setEditing] = useState(null); // null | 'new' | entry
@@ -148,6 +152,7 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
           activities={activities}
           goals={goals}
           trip={tripMap[viewing.tripId]}
+          onOpenLabel={onOpenLabel}
           onEdit={(entry) => { setViewing(null); setEditing(entry); }}
           onDelete={handleDelete}
           onToggleFavorite={onToggleFavorite}
@@ -210,7 +215,7 @@ export default function DayView({ date, dayEntries, allEntries, activities, goal
           ) : (
             <div className="day-entries">
               {entries.map((e) => (
-                <EntryCard key={e.id} entry={e} actMap={actMap} trip={tripMap[e.tripId]} onClick={() => setViewing(e)} />
+                <EntryCard key={e.id} entry={e} actMap={actMap} trip={tripMap[e.tripId]} onClick={() => setViewing(e)} onOpenLabel={onOpenLabel} />
               ))}
             </div>
           )}

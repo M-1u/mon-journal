@@ -8,6 +8,7 @@ import GalleryView from "./components/GalleryView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import GoalsView from "./components/GoalsView.jsx";
 import InsightsView from "./components/InsightsView.jsx";
+import LabelView from "./components/LabelView.jsx";
 import SearchView from "./components/SearchView.jsx";
 import LockScreen from "./components/LockScreen.jsx";
 // Travel view bundles the world map + country data; load it on demand.
@@ -210,6 +211,12 @@ export default function App() {
   const openDay = useCallback((d) => {
     setDate(d);
     setView("today");
+  }, []);
+
+  const [label, setLabel] = useState(null); // { type: "tag"|"person", value }
+  const openLabel = useCallback((type, value) => {
+    setLabel({ type, value });
+    setView("label");
   }, []);
 
   const handleSettingChange = useCallback(async (patch) => {
@@ -415,6 +422,7 @@ export default function App() {
             onToggleFavorite={handleToggleFavorite}
             onTasksChange={handleTasksChange}
             onTrackersChange={handleTrackersChange}
+            onOpenLabel={openLabel}
           />
         )}
         {view === "calendar" && (
@@ -441,13 +449,23 @@ export default function App() {
           <GoalsView goals={goals} entries={entries} onChange={handleGoalsChange} />
         )}
         {view === "search" && (
-          <SearchView entries={entries} activities={activities} onOpenDay={openDay} />
+          <SearchView entries={entries} activities={activities} onOpenDay={openDay} onOpenLabel={openLabel} />
         )}
         {view === "stats" && (
           <StatsView entries={entries} entriesByDate={entriesByDate} activities={activities} trackers={trackers} />
         )}
         {view === "insights" && (
           <InsightsView entries={entries} entriesByDate={entriesByDate} activities={activities} />
+        )}
+        {view === "label" && label && (
+          <LabelView
+            label={label}
+            entries={entries}
+            activities={activities}
+            onOpenDay={openDay}
+            onOpenLabel={openLabel}
+            onBack={() => setView("search")}
+          />
         )}
         {view === "gallery" && <GalleryView entries={entries} onOpenDay={openDay} />}
         {view === "settings" && (

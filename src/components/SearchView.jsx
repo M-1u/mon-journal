@@ -12,7 +12,7 @@ function plain(text) {
   return (text || "").replace(/[#*_`>[\]]/g, "").replace(/\n+/g, " ");
 }
 
-export default function SearchView({ entries, activities, onOpenDay }) {
+export default function SearchView({ entries, activities, onOpenDay, onOpenLabel }) {
   const [q, setQ] = useState("");
   const [moods, setMoods] = useState(() => new Set());
   const [acts, setActs] = useState(() => new Set());
@@ -186,8 +186,12 @@ export default function SearchView({ entries, activities, onOpenDay }) {
                     {e.text?.trim() ? <div className="excerpt">{plain(e.text)}</div> : null}
                     {(e.tags?.length || e.people?.length) ? (
                       <div className="de-labels">
-                        {(e.tags || []).map((tg) => <span className="lbl-tag" key={"t" + tg}>#{tg}</span>)}
-                        {(e.people || []).map((p) => <span className="lbl-person" key={"p" + p}>@{p}</span>)}
+                        {(e.tags || []).map((tg) => (
+                          <button className="lbl-tag" key={"t" + tg} onClick={(ev) => { ev.stopPropagation(); onOpenLabel?.("tag", tg); }}>#{tg}</button>
+                        ))}
+                        {(e.people || []).map((p) => (
+                          <button className="lbl-person" key={"p" + p} onClick={(ev) => { ev.stopPropagation(); onOpenLabel?.("person", p); }}>@{p}</button>
+                        ))}
                       </div>
                     ) : null}
                     {imgs.length ? (

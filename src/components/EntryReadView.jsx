@@ -11,7 +11,7 @@ import { t } from "../lib/i18n.js";
 import { IconChevronLeft, IconEdit, IconTrash, IconCheck, IconClose, IconStar } from "./Icons.jsx";
 
 // Read-only view of one entry, with a button to switch to editing.
-export default function EntryReadView({ entry, activities, goals, trip, onEdit, onDelete, onToggleFavorite, onBack }) {
+export default function EntryReadView({ entry, activities, goals, trip, onEdit, onDelete, onToggleFavorite, onOpenLabel, onBack }) {
   const [lightbox, setLightbox] = useState(null);
   const [fav, setFav] = useState(!!entry.favorite);
   const mood = moodOf(entry.mood);
@@ -116,8 +116,12 @@ export default function EntryReadView({ entry, activities, goals, trip, onEdit, 
 
       {(entry.tags?.length || entry.people?.length) ? (
         <div className="de-labels" style={{ marginTop: 16 }}>
-          {(entry.tags || []).map((tg) => <span className="lbl-tag" key={"t" + tg}>#{tg}</span>)}
-          {(entry.people || []).map((p) => <span className="lbl-person" key={"p" + p}>@{p}</span>)}
+          {(entry.tags || []).map((tg) => (
+            <button className="lbl-tag" key={"t" + tg} onClick={() => onOpenLabel?.("tag", tg)}>#{tg}</button>
+          ))}
+          {(entry.people || []).map((p) => (
+            <button className="lbl-person" key={"p" + p} onClick={() => onOpenLabel?.("person", p)}>@{p}</button>
+          ))}
         </div>
       ) : null}
 

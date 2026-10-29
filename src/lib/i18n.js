@@ -43,6 +43,10 @@ const FR = {
   "insights.byActivity": "Humeur moyenne selon l'activité",
   "insights.byPeople": "Humeur moyenne selon les personnes",
 
+  // Label (tag / person) pages
+  "label.count": "{n} moment",
+  "label.count_plural": "{n} moments",
+
   // Travel
   "travel.title": "Voyages",
   "travel.sub": "Ta carte du monde : pays et villes visités, et tes envies.",
@@ -457,6 +461,9 @@ const EN = {
   "insights.byWeather": "Average mood by weather",
   "insights.byActivity": "Average mood by activity",
   "insights.byPeople": "Average mood by people",
+
+  "label.count": "{n} moment",
+  "label.count_plural": "{n} moments",
 
   "travel.title": "Travel",
   "travel.sub": "Your world map: countries and cities visited, and your wishlist.",
